@@ -1,0 +1,6 @@
+name: CloudSheets
+description: A sample web application
+dependencies:
+  browser: any
+  rikulo_ui:
+  bootjack:
