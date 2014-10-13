@@ -1,4 +1,17 @@
 
+.navbar {
+	padding: 8px;
+}
+
+#sidebarContainer {
+	min-height: 800px;
+	background-color: #f0f0f0;
+	padding: 10px;
+}
+
+#sidebarContainer .panel-group {
+}
+
 body {
 }
 

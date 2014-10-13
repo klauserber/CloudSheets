@@ -5,7 +5,10 @@ import 'package:dquery/dquery.dart';
 
 void main() {
   //Button.use();  
-    
+  Transition.use();
+  Collapse.use();
+  
+  
   $("#sidebarToggle").click((QueryEvent ev) {
     
     $("#sidebarContainer").toggle();    
