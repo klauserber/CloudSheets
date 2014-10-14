@@ -14,12 +14,7 @@
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
-<<<<<<< HEAD
-      
-=======
->>>>>>> branch 'master' of ssh://pi@git.isium.de/data/repo/CloudSheets
       <button id="sidebarToggle" class="btn btn-primary">Menu</button>
-
     </div>
 	  
 	  
@@ -37,16 +32,16 @@
 				    </div>
 				    <div id="collapseOne" class="panel-collapse collapse in">
 				      <div class="panel-body">
-								<ul class="list-group">
+								<ul class="list-group" id="allSongsList">
 								  <li class="list-group-item">Cras justo odio</li>
 								  <li class="list-group-item">Dapibus ac facilisis in</li>
 								  <li class="list-group-item">Morbi leo risus</li>
 								  <li class="list-group-item">Porta ac consectetur ac</li>
 								  <li class="list-group-item">Vestibulum at eros</li>
 								</ul>
-                <button id="importButton" class="btn btn-primary btn-xs">Import</button>
+                <button id="importButton" class="btn btn-primary">Import</button>
                 <input style="display: none;" type="file" id="filesInput" name="files[]" multiple/>
-                <button id="uploadButton" style="display: none;" class="btn btn-primary btn-xs">Upload</button>
+                <span id="alertUploadSuccess" style="display: none; margin-left: 25px;" class="alert alert-success">Files uploaded</span>
 				      </div>
 				    </div>
 				  </div>

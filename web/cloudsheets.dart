@@ -1,25 +1,27 @@
 import 'dart:html';
 import 'package:bootjack/bootjack.dart';
 import 'package:dquery/dquery.dart';
+import 'FsService.dart';
+import 'SongService.dart';
+import 'UiService.dart';
 
+
+FsService fsService;
+SongService songService;
+UiService uiService;
 
 void main() {
-  //Button.use();  
-  Transition.use();
-  Collapse.use();
   
-  
-  $("#sidebarToggle").click((QueryEvent ev) {
+  fsService = new FsService(() {
+    print("fs initialized");
+    songService = new SongService(fsService);
+    uiService = new UiService(fsService, songService);
     
-    $("#sidebarContainer").toggle();    
-  });
-  
-  $("#importButton").click((QueryEvent ev) {
-    $("#filesInput")[0].style.display = "inline";
-    $("#uploadButton")[0].style.display = "inline";
+    uiService.initApp();
   });
   
   
   
 }
+
 
