@@ -46,17 +46,53 @@ class FsService {
   
   void uploadFiles(List<File> files, Function ready) {
     
+    int counter = 0;
     for(File file in files) {
       allSongsDir.createFile(file.name).then((FileEntry entry) {
         entry.createWriter().then((FileWriter writer) {
+          writer.onWriteEnd.listen((ProgressEvent ev) {
+            counter++;
+            if(counter == files.length) {
+              ready();            
+            }
+          });
           writer.write(file);
         }, onError: fileErrorHandler);
       }, onError: fileErrorHandler);
-      
-      ready();   
     }
     
-  }  
+  } 
+  
+  void saveSongAsText(String name, String data, Function ready(FileEntry entry)) {
+    print(data);
+    allSongsDir.getFile(name).then((FileEntry entry) {
+      deleteFile(entry, (e) {
+        saveFileAsText(name, data, (entry) {
+          ready(entry);
+        });        
+      });
+    }, onError: (e) {
+      saveFileAsText(name, data, (entry) {
+        ready(entry);
+      });
+    });
+    
+  }
+  
+  
+  void saveFileAsText(String name, String data, Function ready(FileEntry entry)) {
+    allSongsDir.createFile(name).then((FileEntry entry) {
+      entry.createWriter().then((FileWriter writer) {
+        writer.onWriteEnd.listen((ProgressEvent ev) {
+          ready(entry);
+        });
+        
+        Blob bl = new Blob([data], "text/plain");
+        writer.write(bl);
+        
+      }, onError: fileErrorHandler);
+    }, onError: fileErrorHandler);
+  }
   
   void readAllSongs(Function ready(List<FileEntry> fileEntries)) {
     
@@ -73,7 +109,6 @@ class FsService {
   }
   
   void readTextForEntry(FileEntry e, Function ready(String text)) {
-    String result = ""; 
     e.file().then((File file) {
       FileReader reader = new FileReader();
       reader.onLoadEnd.listen((e) {
@@ -84,6 +119,12 @@ class FsService {
        },
        onError: fileErrorHandler
      );        
+  }
+  
+  void deleteFile(FileEntry e, Function ready(e)) {
+    e.remove().then((e) {
+      ready(e);
+    });  
   }
   
   

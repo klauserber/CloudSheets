@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html style="height: 100%;">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,67 +12,87 @@
     <link rel="stylesheet" href="packages/bootjack/css/bootstrap.css">
     <link rel="stylesheet" href="cloudsheets.css">
   </head>
-  <body>
+  <body style="height: 100%;">
     <div class="navbar navbar-inverse navbar-fixed-top">
-      <button id="sidebarToggle" class="btn btn-primary">Menu</button>
+      <div class="nav-left">
+        <button id="sidebarToggle" class="btn btn-primary" title="Songs"><span class="glyphicon glyphicon-tasks"></span></button>
+      </div>
+      <div class="nav-right">
+        <button id="songNewButton" class="btn btn-primary" title="New"><span class="glyphicon glyphicon-plus"></span> New</button>
+        <button id="songDeleteButton" class="btn btn-primary" data-toggle="modal" data-target=".delete-song-confirm">
+          <span class="glyphicon glyphicon-trash"></span> Delete
+        </button>
+        <button id="songSaveButton" class="btn btn-primary" title="Save"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+        <button id="songCancelButton" class="btn btn-primary" title="Cancel"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+        <button id="songEditButton" class="btn btn-primary" title="Edit"><span class="glyphicon glyphicon-pencil"></span> Edit</button>
+      </div>
     </div>
 	  
 	  
-	  <div class="container-fluid" style="margin-top: 55px">
-	   <div class="row">
-	    <div id="sidebarContainer" class="col-xs-6">
-				<div class="panel-group" id="accordion">
-				  <div class="panel panel-primary">
-				    <div class="panel-heading">
-				      <h4 class="panel-title">
-				        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-				          All Songs
-				        </a>
-				      </h4>
-				    </div>
-				    <div id="collapseOne" class="panel-collapse collapse in">
-				      <div class="panel-body">
-								<ul class="list-group" id="allSongsList">
-								  <li class="list-group-item">Cras justo odio</li>
-								  <li class="list-group-item">Dapibus ac facilisis in</li>
-								  <li class="list-group-item">Morbi leo risus</li>
-								  <li class="list-group-item">Porta ac consectetur ac</li>
-								  <li class="list-group-item">Vestibulum at eros</li>
-								</ul>
-                <button id="importButton" class="btn btn-primary">Import</button>
-                <input style="display: none;" type="file" id="filesInput" name="files[]" multiple/>
-                <span id="alertUploadSuccess" style="display: none; margin-left: 25px;" class="alert alert-success">Files uploaded</span>
-				      </div>
-				    </div>
-				  </div>
-				  <div class="panel panel-primary">
-				    <div class="panel-heading">
-				      <h4 class="panel-title">
-				        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
-				          Sets
-				        </a>
-				      </h4>
-				    </div>
-				    <div id="collapseTwo" class="panel-collapse collapse">
-				      <div class="panel-body">
-                <ul class="list-group">
-                  <li class="list-group-item">Cras justo odio</li>
-                  <li class="list-group-item">Dapibus ac facilisis in</li>
-                  <li class="list-group-item">Morbi leo risus</li>
-                  <li class="list-group-item">Porta ac consectetur ac</li>
-                  <li class="list-group-item">Vestibulum at eros</li>
-                </ul>
-				      </div>
-				    </div>
-				  </div>
-				</div>
+	  <div class="container-fluid" style="margin-top: 55px; height: 90%;">
+	    <div id="sidebarContainer">
+	    
+				<!-- Nav tabs -->
+				<ul class="nav nav-tabs" role="tablist">
+				  <li class="active"><a href="#allsongs" role="tab" data-toggle="tab">All Songs</a></li>
+				  <li><a href="#sets" role="tab" data-toggle="tab">Sets</a></li>
+				</ul>
 
+				<!-- Tab panes -->
+				<div class="tab-content" style="background-color: white; padding: 10px;">
+				  <div class="tab-pane active" id="allsongs">
+            <ul class="list-group" id="allSongsList">
+              <li class="list-group-item">Cras justo odio</li>
+              <li class="list-group-item">Dapibus ac facilisis in</li>
+              <li class="list-group-item">Morbi leo risus</li>
+              <li class="list-group-item">Porta ac consectetur ac</li>
+              <li class="list-group-item">Vestibulum at eros</li>
+            </ul>
+            <button id="importButton" class="btn btn-primary">Import</button>
+            <input style="display: none;" type="file" id="filesInput" name="files[]" multiple/>
+            <span id="alertUploadSuccess" style="display: none; margin-left: 25px;" class="alert alert-success">Files uploaded</span>         				  
+				  </div>
+				  <div class="tab-pane" id="sets">
+	          <ul class="list-group">
+	            <li class="list-group-item">Cras justo odio</li>
+	            <li class="list-group-item">Dapibus ac facilisis in</li>
+	            <li class="list-group-item">Morbi leo risus</li>
+	            <li class="list-group-item">Porta ac consectetur ac</li>
+	            <li class="list-group-item">Vestibulum at eros</li>
+	          </ul>
+				  </div>
+				</div>	    
 	    </div>
-	    <div id="mainContent" class="col-xs-6">
-	     Zwei flinke Boxer jagen die quirlige Eva und ihren Mops durch Sylt. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern. Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich. Vogel Quax zwickt Johnys Pferd Bim. Sylvia wagt quick den Jux bei Pforzheim. Polyfon zwitschernd aßen Mäxchens Vögel Rüben, Joghurt und Quark. "Fix, Schwyz!" quäkt Jürgen blöd vom Paß. Victor jagt zwölf Boxkämpfer quer über den großen Sylter Deich. Falsches Üben von Xylophonmusik quält jeden größeren Zwerg. Heizölrückstoßabdämpfung. Zwei flinke Boxer jagen die quirlige Eva und ihren Mops durch Sylt. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern. Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich. Vogel Quax zwickt Johnys Pferd Bim. Sylvia wagt quick den Jux bei Pforzheim. Polyfon zwitschernd aßen Mäxchens Vögel Rüben, Joghurt und Quark. "Fix, Schwyz!" quäkt Jürgen blöd vom Paß. Victor jagt zwölf Boxkämpfer quer über den großen Sylter Deich. Falsches Üben von Xylophonmusik quält jeden größeren Zwerg. Heizölrückstoßabdämpfung.Zwei flinke Boxer jagen die quirlige Eva und ihren Mops durch Sylt. Franz jagt im komplett verwahrlosten Taxi quer durch Bayern. Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich. Vogel Quax zwickt Johnys Pferd Bim. Sylvia wagt quick den Jux	  
+	    <div id="mainContent" style="height: 100%;">
+	     <h2 id="songTitle">Title</h2>
+       <pre id="songBodyText"></pre>    
+
+       <div class="form-group" style="margin-top: 15px;">
+        <input type="text" id="songTitleInput" class="form-control" placeholder="Song Title.txt"/>
+       </div>
+       <div class="form-group" style="height: 80%;">
+        <textarea id="songBodyInput" class="form-control" placeholder="Song Content"></textarea>
+       </div>
       </div>	  
-     </div>
 	  </div>
-  
+		
+		<div class="modal fade delete-song-confirm" tabindex="-1" role="dialog" aria-labelledby="deleteConfirmLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+	        <div class="modal-header">
+	          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	          <h4 class="modal-title" id="deleteConfirmLabel">Delete</h4>
+	        </div>		    
+			    <div class="modal-body">
+			      Delete Song?
+			    </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+		        <button id="songDeleteConfirmButton" type="button" class="btn btn-primary" data-dismiss="modal">Yes</button>
+		      </div>      
+		    </div>
+		  </div>
+		</div>  
   </body>
 </html>
+

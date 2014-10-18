@@ -23,11 +23,18 @@ class Song {
       ready(text);
     });
   }
+  
+  void delete(Function ready()) {
+    _fsService.deleteFile(_entry, (e) {
+      ready();
+    });
+  }
 }
 
 class SongService {
   
   FsService _fsService;
+  Song activeSong;
   
   SongService(FsService fsService) {
     this._fsService = fsService;
@@ -46,4 +53,6 @@ class SongService {
       ready(result);
     });
   }
+  
+  
 }
