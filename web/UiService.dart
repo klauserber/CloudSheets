@@ -3,19 +3,40 @@ library uiService;
 import 'dart:html';
 import 'package:bootjack/bootjack.dart';
 import 'package:dquery/dquery.dart';
+import 'CsBase.dart';
 import 'SongService.dart';
+import 'SetService.dart';
 import 'FsService.dart';
+
+class OperatingMode extends Enum<int>  {
+  const OperatingMode(int value) : super(value);
+  
+  static const OperatingMode SONG = const OperatingMode(0);
+  static const OperatingMode SET = const OperatingMode(0);
+  
+}
 
 class UiService {
   
   SongService _songService;
+  SetService _setService;
   FsService _fsService;
+ 
+  OperatingMode _mode;
   
   ButtonElement _sidebarToggle;
   DivElement _sidebarContainer;
   DivElement _mainContent;
   InputElement _filesInput;
   
+  
+  // Song elements 
+  UListElement _allSongsList;
+  
+  DivElement _songView; 
+
+  DivElement _songToolBar; 
+
   ButtonElement _songEditButton;
   ButtonElement _songNewButton;
   ButtonElement _songDeleteConfirmButton;
@@ -27,14 +48,31 @@ class UiService {
   InputElement _songTitleInput;
   PreElement _songBodyText;
   TextAreaElement _songBodyInput;
-  //TextAreaElement _songBodyText;
+  
+  // Set elements
+  UListElement _allSetsList;
+
+  DivElement _setView; 
+  
+  ButtonElement _setNewButton;
+
+  DivElement _setToolBar; 
+  ButtonElement _setDeleteConfirmButton;
+  ButtonElement _setDeleteButton;
+  ButtonElement _setSaveButton;
+  ButtonElement _setCancelButton;
+  
+  InputElement _setTitleInput;
+  UListElement _setContentList;
+  
+  
   
   bool _sidebarVisible = true;
   
-  UiService(FsService fsService, SongService songService) {
+  UiService(FsService fsService, SongService songService, SetService setService) {
     _fsService = fsService;
     _songService = songService;
-    
+    _setService = setService;
   }
   
   void initApp() {
@@ -44,11 +82,22 @@ class UiService {
     
     Tab.use();
     
+    _mode = OperatingMode.SONG;
+
+    
     _sidebarContainer = $("#sidebarContainer")[0];
     _sidebarToggle = $("#sidebarToggle")[0];
     _mainContent = $("#mainContent")[0];
     _filesInput = $("#filesInput")[0];
     
+    
+    // Song elements init
+    _allSongsList = $("#allSongsList")[0];
+    
+    _songView = $("#songView")[0];
+    
+    _songToolBar = $("#songToolBar")[0];
+
     _songEditButton = $("#songEditButton")[0];
     _songNewButton = $("#songNewButton")[0];
     _songDeleteConfirmButton = $("#songDeleteConfirmButton")[0];
@@ -77,6 +126,21 @@ class UiService {
     _songSaveButton.onClick.listen((e) => saveSong());
     
     
+    // Set elements init
+    _allSetsList = $("#allSongsList")[0];
+
+    _setView = $("#setView")[0];
+    
+    _setNewButton = $("#setNewButton")[0];
+    
+    _setNewButton.onClick.listen((e) => newSet());
+
+    _setToolBar = $("#setToolBar")[0];
+    _setDeleteConfirmButton = $("#setDeleteConfirmButton")[0];
+    _setDeleteButton = $("#setDeleteButton")[0];
+    _setSaveButton = $("#setSaveButton")[0];
+    _setCancelButton = $("#setCancelButton")[0];
+    
     
     $("#importButton").click((QueryEvent ev) {
       _filesInput.style.display = "inline";
@@ -93,6 +157,11 @@ class UiService {
     
     
     refreshAllSongsList();
+    
+    refreshAllSetsList();
+    
+    switchToSongMode();
+    
     resetUi();
   }
   
@@ -104,6 +173,26 @@ class UiService {
     }  
   }
 
+  void switchToSongMode() {
+    _songView.style.display = "block";
+    _setView.style.display = "none";
+    
+    _songToolBar.style.display = "block";
+    _setToolBar.style.display = "none";
+    
+    _mode = OperatingMode.SONG;
+  }
+  
+  void switchToSetMode() {
+    _songView.style.display = "none";
+    _setView.style.display = "block";
+    
+    _songToolBar.style.display = "none";
+    _setToolBar.style.display = "block";
+    
+    _mode = OperatingMode.SET;
+   }
+  
   void toggleSidebar() {
     sidebarVisible = !sidebarVisible;
   }
@@ -117,6 +206,10 @@ class UiService {
   bool get sidebarVisible {
     return _sidebarVisible;
   }
+  
+  /* ------------ */
+  /* Song methods */  
+  /* ------------ */
   
   void refreshAllSongsList() {
     UListElement allSongsList = $("#allSongsList")[0];
@@ -262,6 +355,34 @@ class UiService {
     
       
     });
+    
+  }
+  
+  /* ----------- */
+  /* Set methods */  
+  /* ----------- */
+
+  void refreshAllSetsList() {
+    _allSetsList.children.clear();
+    _setService.getAllSets((List<SongSet> sets) {
+      sets.forEach((SongSet ss) {
+        LIElement elem = new LIElement();
+        elem.classes.add("list-group-item");
+        elem.text = ss.title; 
+        elem.onClick.listen((MouseEvent ev) {
+          loadSet(ss);
+          _setService.activeSet = ss;
+        });
+        _allSetsList.children.add(elem);
+      });
+    });
+  }
+  
+  void newSet() {
+    switchToSetMode();    
+  }
+  
+  void loadSet(SongSet ss) {
     
   }
   

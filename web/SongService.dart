@@ -2,33 +2,10 @@ library songService;
 
 import 'dart:html';
 import 'FsService.dart';
+import 'CsBase.dart';
 
-class Song {
-  String _text;
-  
-  FileEntry _entry;
-  FsService _fsService;
-  
-  Song(FsService fsService, FileEntry entry) {
-    _entry = entry;
-    _fsService = fsService;
-  }
-  
-  String get title {
-    return _entry.name;
-  }
-  
-  void readText(Function ready(String text)) {
-    _fsService.readTextForEntry(_entry, (String text) {
-      ready(text);
-    });
-  }
-  
-  void delete(Function ready()) {
-    _fsService.deleteFile(_entry, (e) {
-      ready();
-    });
-  }
+class Song extends FileEntity {
+  Song(FsService fsService, FileEntry entry) : super(fsService, entry);
 }
 
 class SongService {
