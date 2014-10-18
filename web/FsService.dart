@@ -7,13 +7,14 @@ const int FS_SIZE = 1024 * 1024 * 5;
 
 
 class FsService {
-  FileSystem fsys;
-  Function readyFunc;
-  DirectoryEntry allSongsDir;
+  FileSystem _fsys;
+  Function _readyFunc;
+  DirectoryEntry _allSongsDir;
+  DirectoryEntry _setsDir;
   
   FsService(Function ready) {
     print("init FsService.");
-    readyFunc = ready;
+    _readyFunc = ready;
     window.navigator.persistentStorage.requestQuota(FS_SIZE, quotaCallback, fileErrorHandler);
     
   }
@@ -30,14 +31,19 @@ class FsService {
   }
   
   void onRequestFileSystem(FileSystem fs) {
-    fsys = fs;
-    fsys.root.createDirectory("cloudsheets").then(
+    _fsys = fs;
+    _fsys.root.createDirectory("cloudsheets").then(
       (DirectoryEntry dir) {
          dir.createDirectory("songs")
-          .then((dir) {
-            allSongsDir = dir;
-            print("songs dir: " + dir.toUrl());
-            readyFunc();
+          .then((songsdir) {
+            _allSongsDir = songsdir;
+            print("songs dir: " + songsdir.toUrl());
+            dir.createDirectory("sets")
+             .then((setsdir) {
+               _setsDir = setsdir;
+               print("sets dir: " + setsdir.toUrl());
+               _readyFunc();
+             });
           });
       },
       onError: fileErrorHandler
@@ -48,7 +54,7 @@ class FsService {
     
     int counter = 0;
     for(File file in files) {
-      allSongsDir.createFile(file.name).then((FileEntry entry) {
+      _allSongsDir.createFile(file.name).then((FileEntry entry) {
         entry.createWriter().then((FileWriter writer) {
           writer.onWriteEnd.listen((ProgressEvent ev) {
             counter++;
@@ -65,7 +71,7 @@ class FsService {
   
   void saveSongAsText(String name, String data, Function ready(FileEntry entry)) {
     print(data);
-    allSongsDir.getFile(name).then((FileEntry entry) {
+    _allSongsDir.getFile(name).then((FileEntry entry) {
       deleteFile(entry, (e) {
         saveFileAsText(name, data, (entry) {
           ready(entry);
@@ -81,7 +87,7 @@ class FsService {
   
   
   void saveFileAsText(String name, String data, Function ready(FileEntry entry)) {
-    allSongsDir.createFile(name).then((FileEntry entry) {
+    _allSongsDir.createFile(name).then((FileEntry entry) {
       entry.createWriter().then((FileWriter writer) {
         writer.onWriteEnd.listen((ProgressEvent ev) {
           ready(entry);
@@ -96,9 +102,23 @@ class FsService {
   
   void readAllSongs(Function ready(List<FileEntry> fileEntries)) {
     
+    readDir(_allSongsDir, (List<FileEntry> fileEntries) {
+      ready(fileEntries);
+    });
+  }
+  
+  void readSets(Function ready(List<FileEntry> fileEntries)) {
+
+    readDir(_setsDir, (List<FileEntry> fileEntries) {
+      ready(fileEntries);
+    });
+    
+  }
+  
+  void readDir(DirectoryEntry dir, Function ready(List<FileEntry> fileEntries)) {
     List<FileEntry> entryList = [];
     
-    allSongsDir.createReader().readEntries()
+    dir.createReader().readEntries()
       .then((List<Entry> entries) {
         entries.forEach((Entry e) {
           entryList.add(e); 
@@ -107,6 +127,7 @@ class FsService {
     },
     onError: fileErrorHandler);
   }
+  
   
   void readTextForEntry(FileEntry e, Function ready(String text)) {
     e.file().then((File file) {

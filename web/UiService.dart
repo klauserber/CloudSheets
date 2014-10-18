@@ -3,19 +3,42 @@ library uiService;
 import 'dart:html';
 import 'package:bootjack/bootjack.dart';
 import 'package:dquery/dquery.dart';
+import 'CsBase.dart';
 import 'SongService.dart';
+import 'SetService.dart';
 import 'FsService.dart';
+
+class OperatingMode extends Enum<int>  {
+  const OperatingMode(int value) : super(value);
+  
+  static const OperatingMode SONG = const OperatingMode(0);
+  static const OperatingMode SET = const OperatingMode(1);
+  
+}
 
 class UiService {
   
   SongService _songService;
+  SetService _setService;
   FsService _fsService;
+ 
+  OperatingMode _mode;
   
   ButtonElement _sidebarToggle;
   DivElement _sidebarContainer;
   DivElement _mainContent;
   InputElement _filesInput;
   
+  
+  // Song elements 
+  CssStyleSheet _songStyles;
+  
+  UListElement _allSongsList;
+  
+  DivElement _songView; 
+
+  DivElement _songToolBar; 
+
   ButtonElement _songEditButton;
   ButtonElement _songNewButton;
   ButtonElement _songDeleteConfirmButton;
@@ -27,14 +50,33 @@ class UiService {
   InputElement _songTitleInput;
   PreElement _songBodyText;
   TextAreaElement _songBodyInput;
-  //TextAreaElement _songBodyText;
+  
+  // Set elements
+  CssStyleSheet _setStyles;
+  
+  UListElement _allSetsList;
+
+  DivElement _setView; 
+  
+  ButtonElement _setNewButton;
+
+  DivElement _setToolBar; 
+  ButtonElement _setDeleteConfirmButton;
+  ButtonElement _setDeleteButton;
+  ButtonElement _setSaveButton;
+  ButtonElement _setCancelButton;
+  
+  InputElement _setTitleInput;
+  UListElement _setContentList;
+  
+  
   
   bool _sidebarVisible = true;
   
-  UiService(FsService fsService, SongService songService) {
+  UiService(FsService fsService, SongService songService, SetService setService) {
     _fsService = fsService;
     _songService = songService;
-    
+    _setService = setService;
   }
   
   void initApp() {
@@ -44,11 +86,22 @@ class UiService {
     
     Tab.use();
     
+    _mode = OperatingMode.SONG;
+
+    
     _sidebarContainer = $("#sidebarContainer")[0];
     _sidebarToggle = $("#sidebarToggle")[0];
     _mainContent = $("#mainContent")[0];
     _filesInput = $("#filesInput")[0];
     
+    
+    // Song elements init
+    _allSongsList = $("#allSongsList")[0];
+    
+    _songView = $("#songView")[0];
+    
+    _songToolBar = $("#songToolBar")[0];
+
     _songEditButton = $("#songEditButton")[0];
     _songNewButton = $("#songNewButton")[0];
     _songDeleteConfirmButton = $("#songDeleteConfirmButton")[0];
@@ -76,6 +129,37 @@ class UiService {
     _songCancelButton.onClick.listen((e) => cancelSong());
     _songSaveButton.onClick.listen((e) => saveSong());
     
+    StyleElement songStyleElem = new StyleElement();
+    document.head.append(songStyleElem);
+    _songStyles = songStyleElem.sheet;
+    _songStyles.insertRule(".addicon { display: none }");
+    
+    // Set elements init
+    _allSetsList = $("#allSongsList")[0];
+
+    _setView = $("#setView")[0];
+    
+    _setNewButton = $("#setNewButton")[0];
+    
+
+    _setToolBar = $("#setToolBar")[0];
+    _setDeleteConfirmButton = $("#setDeleteConfirmButton")[0];
+    _setDeleteButton = $("#setDeleteButton")[0];
+    _setSaveButton = $("#setSaveButton")[0];
+    _setCancelButton = $("#setCancelButton")[0];
+
+    _setNewButton.onClick.listen((e) => newSet());
+    _setCancelButton.onClick.listen((e) => cancelSet());
+    
+    _setTitleInput = $("#setTitleInput")[0];
+    _setContentList = $("#setContentList")[0];
+
+    
+    StyleElement setStyleElem = new StyleElement();
+    document.head.append(setStyleElem);
+    _setStyles = setStyleElem.sheet;
+    _setStyles.insertRule(".addicon { display: inline }");
+        
     
     
     $("#importButton").click((QueryEvent ev) {
@@ -93,8 +177,14 @@ class UiService {
     
     
     refreshAllSongsList();
+    
+    refreshAllSetsList();
+    
+    switchToSongMode();
+    
     resetUi();
   }
+  
   
   void bodyInputAutoGrow() {
     TextAreaElement el = _songBodyInput;
@@ -104,11 +194,38 @@ class UiService {
     }  
   }
 
+  void switchToSongMode() {
+    _songView.style.display = "block";
+    _setView.style.display = "none";
+    
+    _songToolBar.style.display = "block";
+    _setToolBar.style.display = "none";
+    
+    _mode = OperatingMode.SONG;
+    
+    _songStyles.disabled = false;
+    _setStyles.disabled = true;
+  }
+  
+  void switchToSetMode() {
+    _songView.style.display = "none";
+    _setView.style.display = "block";
+    
+    _songToolBar.style.display = "none";
+    _setToolBar.style.display = "block";
+    
+    _mode = OperatingMode.SET;
+    
+    _songStyles.disabled = true;
+    _setStyles.disabled = false;
+   }
+  
   void toggleSidebar() {
     sidebarVisible = !sidebarVisible;
   }
   
   void set sidebarVisible(bool val) {
+    if(val) window.scrollTo(0, 0);
     _sidebarVisible = val;
     _sidebarContainer.style.display = _sidebarVisible ? "block" : "none";
     _mainContent.style.width = _sidebarVisible ? "50%" : "100%";
@@ -118,6 +235,10 @@ class UiService {
     return _sidebarVisible;
   }
   
+  /* ------------ */
+  /* Song methods */  
+  /* ------------ */
+  
   void refreshAllSongsList() {
     UListElement allSongsList = $("#allSongsList")[0];
     allSongsList.children.clear();
@@ -125,16 +246,34 @@ class UiService {
       songs.forEach((Song s) {
         LIElement elem = new LIElement();
         elem.classes.add("list-group-item");
-        elem.text = s.title; 
+
+        SpanElement textSpan = new SpanElement();
+        textSpan.text = s.title;
+        elem.children.add(textSpan);
+        
+        SpanElement addSpan = new SpanElement();
+        addSpan.classes.add("toright");
+        addSpan.classes.add("addicon");
+        addSpan.classes.add("glyphicon");
+        addSpan.classes.add("glyphicon-arrow-right");
+        elem.children.add(addSpan);
+        
+        
         elem.onClick.listen((MouseEvent ev) {
-          loadSong(s);
-          _songService.activeSong = s;
-          sidebarVisible = false;
+          switch (_mode) {
+            case OperatingMode.SONG:
+              loadSong(s);
+              break;
+            case OperatingMode.SET:
+              addSongToSetList(s);
+              break;
+          }
         });
         allSongsList.children.add(elem);
       });
     });
   }
+  
   
   void loadSong(Song s) {
     _songTitle.text = s.title;
@@ -142,10 +281,13 @@ class UiService {
       _songBodyText.text = text;
       _songEditButton.disabled = false;
       _songDeleteButton.disabled = false;
+      _songService.activeSong = s;
+      sidebarVisible = false;
+      window.scrollTo(0, 0);
     });
   }
   
-  void editSong() {
+ void editSong() {
     Song s = _songService.activeSong;
     
     _songTitleInput.value = s.title;
@@ -165,6 +307,7 @@ class UiService {
     _songCancelButton.disabled = false;
     _songSaveButton.disabled = false;
     
+    sidebarVisible = false;
     
   }
   
@@ -240,7 +383,7 @@ class UiService {
     Song s = _songService.activeSong;
     List<String> data = [];
        
-    _fsService.saveSongAsText(_songTitleInput.value, _songBodyInput.value, (FileEntry entry) {
+    _fsService.saveSongAsText(_songTitleInput.value + ".txt", _songBodyInput.value, (FileEntry entry) {
       Song s = new Song(_fsService, entry);
       _songService.activeSong = s;
       _songTitle.text = _songTitleInput.value;
@@ -264,5 +407,58 @@ class UiService {
     });
     
   }
+  
+  /* ----------- */
+  /* Set methods */  
+  /* ----------- */
+
+  void refreshAllSetsList() {
+    _allSetsList.children.clear();
+    _setService.getAllSets((List<SongSet> sets) {
+      sets.forEach((SongSet ss) {
+        LIElement elem = new LIElement();
+        elem.classes.add("list-group-item");
+        elem.text = ss.title; 
+        elem.onClick.listen((MouseEvent ev) {
+          loadSet(ss);
+          _setService.activeSet = ss;
+        });
+        _allSetsList.children.add(elem);
+      });
+    });
+  }
+  
+  void newSet() {
+    switchToSetMode();    
+  }
+  
+  void addSongToSetList(Song s) {
+    
+    LIElement elem = new LIElement();
+    elem.classes.add("list-group-item");
+    elem.dataset["key"] = s.key;
+    SpanElement titleSpan = new SpanElement();
+    titleSpan.text = s.title;
+    elem.children.add(titleSpan);
+    
+    SpanElement deleteSpan = new SpanElement();
+    deleteSpan.classes.add("toright");
+    deleteSpan.classes.add("glyphicon");
+    deleteSpan.classes.add("glyphicon-trash");
+    elem.children.add(deleteSpan);
+    
+    _setContentList.children.add(elem);
+    
+  }
+  
+  void loadSet(SongSet ss) {
+    
+  }
+  
+  void cancelSet() {
+   switchToSongMode(); 
+    
+  }
+  
   
 }

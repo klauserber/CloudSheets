@@ -32,6 +32,10 @@
 	background-color: #f0f0FF;
 }
 
+.toright {
+	float: right;
+}
+
 #songBodyText, #songBodyInput, #songTitleInput {
   font-family: Courier, monospace;
   font-size: 1.6em;
