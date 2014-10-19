@@ -21,8 +21,7 @@ class FileEntity {
   String get key {
     return _entry.name;
   }
-  
-  
+    
   void readText(Function ready(String text)) {
     _fsService.readTextForEntry(_entry, (String text) {
       ready(text);
