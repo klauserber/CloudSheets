@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html style="height: 100%;">
+<html>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="packages/bootjack/css/bootstrap.css">
     <link rel="stylesheet" href="cloudsheets.css">
   </head>
-  <body style="height: 100%;">
+  <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="nav-left">
         <button id="sidebarToggle" class="btn btn-primary" title="Songs"><span class="glyphicon glyphicon-tasks"></span></button>
@@ -38,25 +38,25 @@
     </div>
 	  
 	  
-	  <div class="container-fluid" style="margin-top: 55px; height: 90%;">
+	  <div id="content" class="container-fluid" style="margin-top: 55px;">
 	    <div id="sidebarContainer">
 	    
 				<!-- Nav tabs -->
 				<ul class="nav nav-tabs" role="tablist">
-				  <li class="active"><a href="#allsongs" role="tab" data-toggle="tab">All Songs</a></li>
-				  <li><a href="#sets" role="tab" data-toggle="tab">Sets</a></li>
+				  <li class="active"><a href="#allSongsContaner" role="tab" data-toggle="tab">All Songs</a></li>
+				  <li><a href="#setsContainer" role="tab" data-toggle="tab">Sets</a></li>
 				</ul>
 
 				<!-- Tab panes -->
 				<div class="tab-content" style="background-color: white; padding: 10px;">
-				  <div class="tab-pane active" id="allsongs">
+				  <div class="tab-pane active" id="allSongsContainer">
             <ul class="list-group" id="allSongsList">
             </ul>
             <button id="importButton" class="btn btn-primary">Import</button>
             <input style="display: none;" type="file" id="filesInput" name="files[]" multiple/>
             <span id="alertUploadSuccess" style="display: none; margin-left: 25px;" class="alert alert-success">Files uploaded</span>         				  
 				  </div>
-				  <div class="tab-pane" id="sets">
+				  <div class="tab-pane" id="setsContainer">
 				    <div>
               <button id="setNewButton" class="btn btn-primary" title="New Set"><span class="glyphicon glyphicon-plus"></span> New</button>
 				    </div>
@@ -65,23 +65,23 @@
 				  </div>
 				</div>	    
 	    </div>
-	    <div id="mainContent" style="height: 100%;">
-	     <div id="songView" style="height: 100%;">
+	    <div id="mainContent"">
+	     <div id="songView">
 	       <h2 id="songTitle">Title</h2>
 	       <pre id="songBodyText"></pre>    
 	
 	       <div class="form-group" style="margin-top: 15px;">
 	        <input type="text" id="songTitleInput" class="form-control" placeholder="Title"/>
 	       </div>
-	       <div class="form-group" style="height: 80%;">
+	       <div class="form-group">
 	        <textarea id="songBodyInput" class="form-control" placeholder="Song Content"></textarea>
 	       </div>
 	     </div>
-       <div id="setView">
+       <div id="setView"">
          <div class="form-group" style="margin-top: 15px;">
           <input type="text" id="setTitleInput" class="form-control" placeholder="Set Title"/>
          </div>
-         <div class="form-group">
+         <div class="form-group" id="setContentContainer">
            <ul class="list-group" id="setContentList">
            </ul>
          </div>

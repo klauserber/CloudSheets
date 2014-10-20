@@ -4,22 +4,24 @@
 }
 
 .nav-left {
-  width: 50%;
   float: left;
 	
 }
 .nav-right {
 	text-align: right;
-  width: 50%;
   display: inline-block;
+  float: right;
 }
 
 #sidebarContainer {
-	min-height: 800px;
 	background-color: #f0f0f0;
 	padding: 10px;
   width: 50%;
   float: left;
+}
+
+.tab-pane {
+	overflow: auto;
 }
 
 #mainContent {
@@ -43,7 +45,6 @@
 
 #songBodyInput {
   width: 100%;
-  height: 100%;
 }
 
 .list-group-item {
@@ -55,6 +56,22 @@
 }
 
 #sidebarContainer .panel-group {
+}
+
+#setContentContainer {
+	overflow: auto;
+	padding: 5px;
+	border: 1px solid #c8c8c8;
+}
+
+#setContentList {
+	counter-reset: setCounter;
+}
+
+#setContentList li:before {
+	content: counter(setCounter) ". ";
+	counter-increment: setCounter;
+	
 }
 
 body {

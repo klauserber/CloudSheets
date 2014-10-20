@@ -68,6 +68,7 @@ class UiService {
   
   InputElement _setTitleInput;
   UListElement _setContentList;
+  DivElement _setContentContainer;
   
   
   
@@ -85,6 +86,8 @@ class UiService {
     Modal.use();
     
     Tab.use();
+    
+    window.onResize.listen((Event e) => setSizes());
     
     _mode = OperatingMode.SONG;
 
@@ -132,7 +135,7 @@ class UiService {
     StyleElement songStyleElem = new StyleElement();
     document.head.append(songStyleElem);
     _songStyles = songStyleElem.sheet;
-    _songStyles.insertRule(".addicon { display: none }");
+    _songStyles.insertRule(".addicon { display: none }", 0);
     
     // Set elements init
     _allSetsList = $("#allSongsList")[0];
@@ -153,12 +156,13 @@ class UiService {
     
     _setTitleInput = $("#setTitleInput")[0];
     _setContentList = $("#setContentList")[0];
+    _setContentContainer = $("#setContentContainer")[0];
 
     
     StyleElement setStyleElem = new StyleElement();
     document.head.append(setStyleElem);
     _setStyles = setStyleElem.sheet;
-    _setStyles.insertRule(".addicon { display: inline }");
+    _setStyles.insertRule(".addicon { display: inline }", 0);
         
     
     
@@ -183,7 +187,16 @@ class UiService {
     switchToSongMode();
     
     resetUi();
+    
+    setSizes();
   }
+  
+  void setSizes() {
+    _setContentContainer.style.height = "${window.innerHeight - 300}px";
+    
+    $(".tab-pane").css("height", "${window.innerHeight - 140}px");
+  }
+
   
   
   void bodyInputAutoGrow() {
@@ -429,6 +442,7 @@ class UiService {
   }
   
   void newSet() {
+    _setContentList.children.clear;
     switchToSetMode();    
   }
   
@@ -445,11 +459,16 @@ class UiService {
     deleteSpan.classes.add("toright");
     deleteSpan.classes.add("glyphicon");
     deleteSpan.classes.add("glyphicon-trash");
+    deleteSpan.onClick.listen((e) {
+      _setContentList.children.remove(elem);
+    });
+    
     elem.children.add(deleteSpan);
     
     _setContentList.children.add(elem);
-    
+    elem.scrollIntoView(); 
   }
+  
   
   void loadSet(SongSet ss) {
     
@@ -457,8 +476,9 @@ class UiService {
   
   void cancelSet() {
    switchToSongMode(); 
+   _setContentList.children.clear();
     
   }
   
-  
 }
+

@@ -1,0 +1,24 @@
+I want it all
+Queen
+Key: Bm
+
+Intro/Str/Ref:
+Bm  G  A  Bm A
+
+Bridge:
+D  A  A  G
+
+Mittelteil:
+Bm  E F#
+        3x
+G  A
+
+Git Solo:
+Bm  G  A  E
+          4x
+          d c# d c# e
+          
+End: Ref
+G
+
+
