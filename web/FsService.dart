@@ -73,21 +73,36 @@ class FsService {
     print(data);
     _allSongsDir.getFile(name).then((FileEntry entry) {
       deleteFile(entry, (e) {
-        saveFileAsText(name, data, (entry) {
+        saveFileAsText(_allSongsDir, name, data, (entry) {
           ready(entry);
         });        
       });
     }, onError: (e) {
-      saveFileAsText(name, data, (entry) {
+      saveFileAsText(_allSongsDir, name, data, (entry) {
         ready(entry);
       });
     });
     
   }
   
+  void saveSet(String name, String data, Function ready(FileEntry entry)) {
+    print(data);
+    _setsDir.getFile(name).then((FileEntry entry) {
+      deleteFile(entry, (e) {
+        saveFileAsText(_setsDir, name, data, (entry) {
+          ready(entry);
+        });        
+      });
+    }, onError: (e) {
+      saveFileAsText(_setsDir, name, data, (entry) {
+        ready(entry);
+      });
+    });
+    
+  }
   
-  void saveFileAsText(String name, String data, Function ready(FileEntry entry)) {
-    _allSongsDir.createFile(name).then((FileEntry entry) {
+  void saveFileAsText(DirectoryEntry dir, String name, String data, Function ready(FileEntry entry)) {
+    dir.createFile(name).then((FileEntry entry) {
       entry.createWriter().then((FileWriter writer) {
         writer.onWriteEnd.listen((ProgressEvent ev) {
           ready(entry);

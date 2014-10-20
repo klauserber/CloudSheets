@@ -20,7 +20,7 @@
   float: left;
 }
 
-.tab-pane {
+#allSongsContainer, #allSetsContainer, #setContentContainer, #songBodyText {
 	overflow: auto;
 }
 
