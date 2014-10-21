@@ -23,6 +23,7 @@ class UiService {
   FsService _fsService;
  
   OperatingMode _mode;
+  bool _songEditMode = false;
   
   ButtonElement _sidebarToggle;
   DivElement _sidebarContainer;
@@ -166,6 +167,7 @@ class UiService {
     _setSaveButton.onClick.listen((e) => saveSet());
     
     _setTitleInput = $("#setTitleInput")[0];
+    _setTitleText = $("#setTitleText")[0];
     _setContentList = $("#setContentList")[0];
     _setContentContainer = $("#setContentContainer")[0];
 
@@ -195,59 +197,39 @@ class UiService {
     
     refreshAllSetsList();
     
-    switchToSongMode();
     
     resetUi();
     
     setSizes();
   }
   
+  editSet() {
+  }
+  
+  backSet() {
+  }
+  
   
   void setSizes() {
     
     int h = window.innerHeight;
-    _setContentContainer.style.height = "${h - 122}px";
+    _setContentContainer.style.height = "${h - 130}px";
     _allSongsContainer.style.height = "${h - 140}px";
-    _allSetsList.style.height = "${h - 205}px";
+    _allSetsList.style.height = "${h - 215}px";
     _songBodyText.style.height = "${h - 130}px";
     _songBodyInput.style.height = "${h - 130}px";
     
   }
 
   
-  
-  void bodyInputAutoGrow() {
-    TextAreaElement el = _songBodyInput;
-    
-    if (el.scrollHeight > el.clientHeight) {
-      el.style.height = "${el.scrollHeight}px";
-    }  
-  }
-
   void switchToSongMode() {
-    _songView.style.display = "block";
-    _setView.style.display = "none";
-    
-    _songToolBar.style.display = "block";
-    _setToolBar.style.display = "none";
-    
     _mode = OperatingMode.SONG;
-    
-    _songStyles.disabled = false;
-    _setStyles.disabled = true;
+    updateUiState();    
   }
   
   void switchToSetMode() {
-    _songView.style.display = "none";
-    _setView.style.display = "block";
-    
-    _songToolBar.style.display = "none";
-    _setToolBar.style.display = "block";
-    
     _mode = OperatingMode.SET;
-    
-    _songStyles.disabled = true;
-    _setStyles.disabled = false;
+    updateUiState();
    }
   
   void toggleSidebar() {
@@ -314,10 +296,9 @@ class UiService {
     _songTitle.text = s.title;
     s.readText((String text) {
       _songBodyText.text = text;
-      _songEditButton.disabled = false;
-      _songDeleteButton.disabled = false;
       _songService.activeSong = s;
       sidebarVisible = false;
+      updateUiState();
       window.scrollTo(0, 0);
     });
   }
@@ -328,71 +309,70 @@ class UiService {
     _songTitleInput.value = s.title;
     s.readText((String text) {
       _songBodyInput.value = text;  
+      _songEditMode = true;
+      updateUiState();    
+      sidebarVisible = false;
     });
 
-    _songTitle.style.display = "none";
-    _songBodyText.style.display = "none";
-    _songTitleInput.style.display = "block";
-    _songBodyInput.style.display = "block";
-    
-    _sidebarToggle.disabled = true;
-    _songEditButton.disabled = true;
-    _songNewButton.disabled = true;
-    
-    _songCancelButton.disabled = false;
-    _songSaveButton.disabled = false;
-    
-    sidebarVisible = false;
     
   }
   
   void resetUi() {
-    _songTitle.style.display = "block";
-    _songBodyText.style.display = "block";
-    _songTitleInput.style.display = "none";
-    _songBodyInput.style.display = "none";
-   
-    _sidebarToggle.disabled = false;
-    
-    _songNewButton.disabled = false;
-    _songEditButton.disabled = true;
-    _songDeleteButton.disabled = true;
-    
-    _songCancelButton.disabled = true;
-    _songSaveButton.disabled = true;
-    
     _songTitle.text = "";
     _songBodyText.text = "";
     
     _songService.activeSong = null;
-    
+    _setService.activeSet = null;
     
     sidebarVisible = true;
+    
+    _songEditMode = false;
+    
+    switchToSongMode();    
   }
   
   void updateUiState() {
+    _sidebarToggle.disabled = _songEditMode || _mode == OperatingMode.SET;
     
+    setVisible(_songToolBar, _mode == OperatingMode.SONG);
+    setVisible(_setToolBar, _mode == OperatingMode.SET);
+    
+    _songNewButton.disabled = _songEditMode;
+    _songSaveButton.disabled = !_songEditMode;
+    _songCancelButton.disabled = !_songEditMode;
+    _songEditButton.disabled = _songEditMode;
+    
+    setVisible(_songView, _mode == OperatingMode.SONG);
+    setVisible(_songTitle, !_songEditMode);
+    setVisible(_songBodyText, !_songEditMode);
+    setVisible(_songTitleInput, _songEditMode);
+    setVisible(_songBodyInput, _songEditMode);
+    
+    _setBackButton.disabled = _setService.activeSet != null;
+    _setDeleteButton.disabled = _setService.activeSet != null;
+    _setEditButton.disabled = _setService.activeSet != null;
+    
+    setVisible(_setView, _mode == OperatingMode.SET);
+    setVisible(_setTitleText, _setService.activeSet != null);
+    setVisible(_setContentList, _mode == OperatingMode.SET);
+    
+    _songStyles.disabled = !(_mode == OperatingMode.SONG);
+    _setStyles.disabled = !(_mode == OperatingMode.SET);
     
   } 
   
+  void setVisible(Element elem, bool visible) {
+    elem.style.display = visible ? "block" : "none";
+  }
   
   
   void newSong() {
-    _songTitle.style.display = "none";
-    _songBodyText.style.display = "none";
-    _songTitleInput.style.display = "block";
-    _songBodyInput.style.display = "block";
-    
-    _sidebarToggle.disabled = true;
-    _songEditButton.disabled = true;
-    _songNewButton.disabled = true;
-    
-    _songCancelButton.disabled = false;
-    _songSaveButton.disabled = false;
-    
+    _songEditMode = true;
     sidebarVisible = false;
     _songTitleInput.value = "";
     _songBodyInput.value = "";
+    
+    updateUiState();
     
   }
   
@@ -401,25 +381,17 @@ class UiService {
     
     s.delete(() {
       refreshAllSongsList();
+      _songService.activeSong = null;
+      _songEditMode = false;
+      resetUi();
     });
     
-    resetUi();
   }
   
   void cancelSong() {
-    _songTitle.style.display = "block";
-    _songBodyText.style.display = "block";
-    _songTitleInput.style.display = "none";
-    _songBodyInput.style.display = "none";
-   
-    _sidebarToggle.disabled = false;
-    _songEditButton.disabled = false;
-    _songNewButton.disabled = false;
-    
-    _songCancelButton.disabled = true;
-    _songSaveButton.disabled = true;
-    
     loadSong(_songService.activeSong);
+    _songEditMode = false;
+    updateUiState();
   }
   
   void saveSong() {
@@ -433,19 +405,9 @@ class UiService {
       _songBodyText.text = _songBodyInput.value;
       
       refreshAllSongsList();
+      _songEditMode = false;
       
-      _songTitle.style.display = "block";
-      _songBodyText.style.display = "block";
-      _songTitleInput.style.display = "none";
-      _songBodyInput.style.display = "none";
-     
-      _sidebarToggle.disabled = false;
-      _songEditButton.disabled = false;
-      _songNewButton.disabled = false;
-      
-      _songCancelButton.disabled = true;
-      _songSaveButton.disabled = true;
-    
+      updateUiState();    
       
     });
     
