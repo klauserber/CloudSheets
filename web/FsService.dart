@@ -21,6 +21,7 @@ class FsService {
   
   void fileErrorHandler(FileError e) {
     window.alert(e.name + ", " + e.message);
+    print(e.name + ", " + e.message);
   }
   
   void quotaCallback(int size) {
@@ -131,10 +132,12 @@ class FsService {
   }
   
   void getSongFileEntry(String name, Function ready(FileEntry entry)) {
-    _allSongsDir.getFile(name).then((FileEntry entry) {
-      ready(entry);
-    },
-    onError: fileErrorHandler);
+    if(name.isNotEmpty) {
+      _allSongsDir.getFile(name).then((FileEntry entry) {
+        ready(entry);
+      },
+      onError: fileErrorHandler);
+    }
     
   }
   void getSetFileEntry(String name, Function ready(FileEntry entry)) {

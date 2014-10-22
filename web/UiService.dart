@@ -165,11 +165,13 @@ class UiService {
     _setNewButton.onClick.listen((e) => newSet());
     _setCancelButton.onClick.listen((e) => cancelSet());
     _setSaveButton.onClick.listen((e) => saveSet());
+    _setDeleteConfirmButton.onClick.listen((e) => deleteSet());
     
     _setTitleInput = $("#setTitleInput")[0];
     _setTitleText = $("#setTitleText")[0];
     _setContentList = $("#setContentList")[0];
     _setContentContainer = $("#setContentContainer")[0];
+    _setList = $("#setList")[0];
 
     
     StyleElement setStyleElem = new StyleElement();
@@ -279,7 +281,7 @@ class UiService {
           loadSong(s);
           break;
         case OperatingMode.SET:
-          addSongToSetList(s);
+          addSongToSetList(s, false);
           break;
       }
     });
@@ -347,10 +349,13 @@ class UiService {
     
     _setBackButton.disabled = !actSet;
     _setDeleteButton.disabled = !actSet;
-    _setEditButton.disabled = !actSet;
-    _setNewButton.disabled = actSet;
+    _setEditButton.disabled = !actSet || _mode == OperatingMode.SET;
+    _setNewButton.disabled = _mode == OperatingMode.SET;
     
     setVisible(_setView, _mode == OperatingMode.SET);
+    setVisible(_setTitleText, actSet);
+    setVisible(_setList, actSet);
+    setVisible(_allSetsList, !actSet);
     
     _songStyles.disabled = !(_mode == OperatingMode.SONG);
     _setStyles.disabled = !(_mode == OperatingMode.SET);
@@ -385,7 +390,6 @@ class UiService {
   }
   
   void cancelSong() {
-    loadSong(_songService.activeSong);
     _songEditMode = false;
     updateUiState();
   }
@@ -422,7 +426,6 @@ class UiService {
         elem.text = ss.title; 
         elem.onClick.listen((MouseEvent ev) {
           loadSet(ss);
-          _setService.activeSet = ss;
         });
         _allSetsList.children.add(elem);
       });
@@ -435,7 +438,7 @@ class UiService {
     switchToSetMode();    
   }
   
-  void addSongToSetList(Song s) {
+  void addSongToSetList(Song s, bool atEnd) {
     
     LIElement elem = new LIElement();
     elem.classes.add("list-group-item");
@@ -454,7 +457,30 @@ class UiService {
     
     elem.children.add(deleteSpan);
     
-    _setContentList.children.add(elem);
+    elem.onClick.listen((e) {
+      if(elem.dataset["mark"] == "1") {
+        elem.dataset["mark"] = "0";        
+      }
+      else { 
+        elem.dataset["mark"] = "1";
+      }
+    });
+    
+    List<Element> childs = _setContentList.children;
+    if(atEnd) {
+      childs.add(elem);      
+    } else {
+      int idx = childs.length - 1;
+      
+      for(int i = 0; i < childs.length; i++) {
+        if(childs[i].dataset["mark"] == "1") {
+          idx = i;
+          break;
+        }      
+      }
+      childs.insert(idx, elem);
+    }
+    
     elem.scrollIntoView(); 
   }
   
@@ -468,6 +494,7 @@ class UiService {
     _fsService.saveSet(_setTitleInput.value + ".txt", data, (FileEntry entry) {
       SongSet ss = new SongSet(_fsService, entry);
       _setService.activeSet = ss;
+      loadSet(ss);
       refreshAllSetsList();
       switchToSongMode();
     });
@@ -476,10 +503,15 @@ class UiService {
   
   void loadSet(SongSet ss) {
     
+    _setList.children.clear();
     _setTitleText.text = ss.title;
-    ss.readText((String text) {
-      
+    _setService.activeSet = ss;
+    ss.getSongs((Song song) {
+      LIElement elem = createSongElement(song);
+      _setList.children.add(elem);
     });
+    
+    updateUiState();
     
   }
   
@@ -490,9 +522,29 @@ class UiService {
   }
   
   void editSet() {
+    SongSet ss = _setService.activeSet;
+    if(ss != null) {
+      _setContentList.children.clear();
+      _setTitleInput.value = ss.title;
+      ss.getSongs((Song song) {
+        addSongToSetList(song, true);
+      });
+      switchToSetMode();    
+    }
   }
   
   void backSet() {
+    _setService.activeSet = null;
+    updateUiState();
+  }
+  
+  void deleteSet() {
+    SongSet ss = _setService.activeSet;
+    if(ss != null) ss.delete(() {
+      _setService.activeSet = null;
+      refreshAllSetsList();
+      updateUiState();      
+    });  
   }
   
 }

@@ -30,9 +30,6 @@
   padding: 0px 15px 0px 15px;
 }
 
-#mainContent [contenteditable="true"] {
-	background-color: #f0f0FF;
-}
 
 .toright {
 	float: right;
@@ -64,14 +61,17 @@
 	border: 1px solid #c8c8c8;
 }
 
-#setContentList {
+.orderedList {
 	counter-reset: setCounter;
 }
 
-#setContentList li:before {
+#setContentList li[data-mark="1"] {
+	background-color: #e8e8e8; 
+}
+
+.orderedList li:before {
 	content: counter(setCounter) ". ";
 	counter-increment: setCounter;
-	
 }
 
 body {
