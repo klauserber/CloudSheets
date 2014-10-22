@@ -33,6 +33,10 @@ class FileEntity {
       ready();
     });
   }
+  
+  FsService get fsService {
+   return _fsService; 
+  }
 }
 
 /**

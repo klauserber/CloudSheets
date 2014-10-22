@@ -3,10 +3,25 @@ library setService;
 import 'dart:html';
 import 'CsBase.dart';
 import 'FsService.dart';
+import 'SongService.dart';
 
 
 class SongSet extends FileEntity {
   SongSet(FsService fsService, FileEntry entry) : super(fsService, entry);
+  
+  void getSongList(Function ready(List<Song> songList)) {
+    readText((String text) {
+      List<Song> res = [];
+      List<String> lines = text.split("\n"); 
+      lines.forEach((String line) {
+        fsService.getSongFileEntry(line, (FileEntry entry) {
+          res.add(new Song(fsService, entry));
+          
+        });
+      });
+      
+    });
+  }
 }
 
 class SetService {
@@ -31,6 +46,7 @@ class SetService {
       ready(result);
     });
   }
+  
   
   
 }

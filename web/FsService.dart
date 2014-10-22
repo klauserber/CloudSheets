@@ -130,6 +130,21 @@ class FsService {
     
   }
   
+  void getSongFileEntry(String name, Function ready(FileEntry entry)) {
+    _allSongsDir.getFile(name).then((FileEntry entry) {
+      ready(entry);
+    },
+    onError: fileErrorHandler);
+    
+  }
+  void getSetFileEntry(String name, Function ready(FileEntry entry)) {
+    _setsDir.getFile(name).then((FileEntry entry) {
+      ready(entry);
+    },
+    onError: fileErrorHandler);
+    
+  }
+  
   void readDir(DirectoryEntry dir, Function ready(List<FileEntry> fileEntries)) {
     List<FileEntry> entryList = [];
     

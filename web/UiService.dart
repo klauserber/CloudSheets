@@ -203,11 +203,6 @@ class UiService {
     setSizes();
   }
   
-  editSet() {
-  }
-  
-  backSet() {
-  }
   
   
   void setSizes() {
@@ -348,13 +343,14 @@ class UiService {
     setVisible(_songTitleInput, _songEditMode);
     setVisible(_songBodyInput, _songEditMode);
     
-    _setBackButton.disabled = _setService.activeSet != null;
-    _setDeleteButton.disabled = _setService.activeSet != null;
-    _setEditButton.disabled = _setService.activeSet != null;
+    bool actSet = _setService.activeSet != null;
+    
+    _setBackButton.disabled = !actSet;
+    _setDeleteButton.disabled = !actSet;
+    _setEditButton.disabled = !actSet;
+    _setNewButton.disabled = actSet;
     
     setVisible(_setView, _mode == OperatingMode.SET);
-    setVisible(_setTitleText, _setService.activeSet != null);
-    setVisible(_setContentList, _mode == OperatingMode.SET);
     
     _songStyles.disabled = !(_mode == OperatingMode.SONG);
     _setStyles.disabled = !(_mode == OperatingMode.SET);
@@ -435,6 +431,7 @@ class UiService {
   
   void newSet() {
     _setContentList.children.clear;
+    _setTitleInput.value = "";
     switchToSetMode();    
   }
   
@@ -479,12 +476,23 @@ class UiService {
   
   void loadSet(SongSet ss) {
     
+    _setTitleText.text = ss.title;
+    ss.readText((String text) {
+      
+    });
+    
   }
   
   void cancelSet() {
    switchToSongMode(); 
    _setContentList.children.clear();
     
+  }
+  
+  void editSet() {
+  }
+  
+  void backSet() {
   }
   
 }
