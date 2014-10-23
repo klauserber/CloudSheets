@@ -220,6 +220,10 @@ class UiService {
   }
 
   void prevSong() {
+    SongSet ss = _setService.activeSet;
+    if(ss != null && ss.hasPrev()) {
+      loadSong(ss.songs[ss.songPos-1]);
+    }
   }
   
   
