@@ -41,6 +41,8 @@ class UiService {
 
   DivElement _songToolBar; 
 
+  ButtonElement _songNextButton;
+  ButtonElement _songPrevButton;
   ButtonElement _songEditButton;
   ButtonElement _songNewButton;
   ButtonElement _songDeleteConfirmButton;
@@ -112,6 +114,8 @@ class UiService {
     
     _songToolBar = $("#songToolBar")[0];
 
+    _songNextButton = $("#songNextButton")[0];
+    _songPrevButton = $("#songPrevButton")[0];
     _songEditButton = $("#songEditButton")[0];
     _songNewButton = $("#songNewButton")[0];
     _songDeleteConfirmButton = $("#songDeleteConfirmButton")[0];
@@ -132,6 +136,8 @@ class UiService {
     
     _sidebarToggle.onClick.listen((e) => toggleSidebar());
     
+    _songNextButton.onClick.listen((e) => nextSong());
+    _songPrevButton.onClick.listen((e) => prevSong());
     _songNewButton.onClick.listen((e) => newSong());
     _songEditButton.onClick.listen((e) => editSong());
     _songDeleteConfirmButton.onClick.listen((e) => deleteSong());
@@ -204,6 +210,18 @@ class UiService {
     
     setSizes();
   }
+  
+  void nextSong() {
+    SongSet ss = _setService.activeSet;
+    if(ss != null && ss.hasNext()) {
+      loadSong(ss.songs[ss.songPos+1]);
+    }
+    
+  }
+
+  void prevSong() {
+  }
+  
   
   
   
@@ -295,8 +313,11 @@ class UiService {
       _songBodyText.text = text;
       _songService.activeSong = s;
       sidebarVisible = false;
+      SongSet ss = _setService.activeSet;
+      if(ss != null) {
+        ss.songPos = s.pos;
+      }
       updateUiState();
-      window.scrollTo(0, 0);
     });
   }
   
@@ -329,10 +350,15 @@ class UiService {
   }
   
   void updateUiState() {
+    bool actSet = _setService.activeSet != null;
+    
     _sidebarToggle.disabled = _songEditMode || _mode == OperatingMode.SET;
     
     setVisible(_songToolBar, _mode == OperatingMode.SONG);
     setVisible(_setToolBar, _mode == OperatingMode.SET);
+    
+    _songNextButton.disabled = !(actSet && _setService.activeSet.hasNext());
+    _songPrevButton.disabled = !(actSet && _setService.activeSet.hasPrev());
     
     _songNewButton.disabled = _songEditMode;
     _songSaveButton.disabled = !_songEditMode;
@@ -345,7 +371,6 @@ class UiService {
     setVisible(_songTitleInput, _songEditMode);
     setVisible(_songBodyInput, _songEditMode);
     
-    bool actSet = _setService.activeSet != null;
     
     _setBackButton.disabled = !actSet;
     _setDeleteButton.disabled = !actSet;
@@ -458,12 +483,10 @@ class UiService {
     elem.children.add(deleteSpan);
     
     elem.onClick.listen((e) {
-      if(elem.dataset["mark"] == "1") {
-        elem.dataset["mark"] = "0";        
-      }
-      else { 
-        elem.dataset["mark"] = "1";
-      }
+      _setContentList.children.forEach((Element e) {
+        e.dataset.remove("mark");
+      });
+      elem.dataset["mark"] = "1";                        
     });
     
     List<Element> childs = _setContentList.children;
@@ -506,7 +529,7 @@ class UiService {
     _setList.children.clear();
     _setTitleText.text = ss.title;
     _setService.activeSet = ss;
-    ss.getSongs((Song song) {
+    ss.readSongs((Song song) {
       LIElement elem = createSongElement(song);
       _setList.children.add(elem);
     });
@@ -526,7 +549,7 @@ class UiService {
     if(ss != null) {
       _setContentList.children.clear();
       _setTitleInput.value = ss.title;
-      ss.getSongs((Song song) {
+      ss.readSongs((Song song) {
         addSongToSetList(song, true);
       });
       switchToSetMode();    

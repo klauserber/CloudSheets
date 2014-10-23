@@ -5,6 +5,8 @@ import 'FsService.dart';
 import 'CsBase.dart';
 
 class Song extends FileEntity {
+  int pos = -1;
+  
   Song(FsService fsService, FileEntry entry) : super(fsService, entry);
 }
 
@@ -20,8 +22,10 @@ class SongService {
   void getAllSongs(Function ready(List<Song> songs)) {
     _fsService.readAllSongs((List<FileEntry> entries) {
       List<Song> result = [];
+      int i = 0;
       entries.forEach((FileEntry e) {
         Song s = new Song(_fsService, e);
+        s.pos = i++;
         result.add(s);
       });
       result.sort((Song s1, Song s2) {
