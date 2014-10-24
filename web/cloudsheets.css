@@ -65,7 +65,7 @@
 	counter-reset: setCounter;
 }
 
-#setContentList li[data-mark="1"] {
+li[data-mark="1"] {
 	background-color: #e8e8e8; 
 }
 

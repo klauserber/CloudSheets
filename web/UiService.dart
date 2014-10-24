@@ -312,7 +312,7 @@ class UiService {
   
   
   void loadSong(Song s) {
-    _songTitle.text = s.title;
+    _songTitle.text = (s.pos + 1).toString() + ". " + s.title;
     s.readText((String text) {
       _songBodyText.text = text;
       _songService.activeSong = s;
@@ -321,8 +321,17 @@ class UiService {
       if(ss != null) {
         ss.songPos = s.pos;
       }
+      markListEntry(ss != null ? _setList : _allSongsList, s.pos);
       updateUiState();
     });
+  }
+
+  void markListEntry(Element elem, int pos) {
+    List<Element> childs = elem.children;
+    childs.forEach((Element e) {
+      e.dataset.remove("mark");
+    });
+    childs[pos].dataset["mark"] = "1";
   }
   
  void editSong() {
@@ -428,7 +437,7 @@ class UiService {
     List<String> data = [];
        
     _fsService.saveSongAsText(_songTitleInput.value + ".txt", _songBodyInput.value, (FileEntry entry) {
-      Song s = new Song(_fsService, entry);
+      Song s = new Song(_fsService, entry, entry.name);
       _songService.activeSong = s;
       _songTitle.text = _songTitleInput.value;
       _songBodyText.text = _songBodyInput.value;
@@ -519,7 +528,7 @@ class UiService {
     });
     
     _fsService.saveSet(_setTitleInput.value + ".txt", data, (FileEntry entry) {
-      SongSet ss = new SongSet(_fsService, entry);
+      SongSet ss = new SongSet(_fsService, entry, entry.name);
       _setService.activeSet = ss;
       loadSet(ss);
       refreshAllSetsList();

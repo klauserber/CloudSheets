@@ -6,12 +6,12 @@ import 'FsService.dart';
 import 'SongService.dart';
 
 
-class SongSet extends FileEntity {
+class SongSet extends StoreEntity {
   
   List<Song> _songs = [];
   int songPos = -1;
   
-  SongSet(FsService fsService, FileEntry entry) : super(fsService, entry);
+  SongSet(FsService fsService, FileEntry entry, String key) : super(fsService, entry, key);
   
   void readSongs(Function forEachSong(Song song)) {
     readText((String text) {
@@ -19,7 +19,7 @@ class SongSet extends FileEntity {
       int i = 0;
       text.split("\n").forEach((String line) {
         fsService.getSongFileEntry(line, (FileEntry entry) {
-          Song s = new Song(fsService, entry);
+          Song s = new Song(fsService, entry, line);
           s.pos = i++;
           _songs.add(s);
           forEachSong(s);
@@ -60,7 +60,7 @@ class SetService {
     _fsService.readSets((List<FileEntry> entries) {
       List<SongSet> result = [];
       entries.forEach((FileEntry e) {
-        SongSet s = new SongSet(_fsService, e);
+        SongSet s = new SongSet(_fsService, e, e.name);
         result.add(s);
       });
       result.sort((SongSet s1, SongSet s2) {

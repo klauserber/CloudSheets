@@ -3,35 +3,45 @@ library csBase;
 import 'dart:html';
 import 'FsService.dart';
 
-class FileEntity {
+class StoreEntity {
   
   FileEntry _entry;
   FsService _fsService;
+  String key;
   
-  FileEntity(FsService fsService, FileEntry entry) {
+  StoreEntity(FsService fsService, FileEntry entry, String key) {
     _entry = entry;
     _fsService = fsService;
+    this.key = key;
   }
   
   String get title {
-    int pos = _entry.name.lastIndexOf(".");
-    return _entry.name.substring(0, pos);
+    int pos = key.lastIndexOf(".");
+    String title = pos > -1 ? key.substring(0, pos) : key;
+    if(_entry == null) title += " (NF)";
+    return title;
   }
-  
-  String get key {
-    return _entry.name;
-  }
-    
+      
   void readText(Function ready(String text)) {
-    _fsService.readTextForEntry(_entry, (String text) {
-      ready(text);
-    });
+    if(_entry != null) {
+      _fsService.readTextForEntry(_entry, (String text) {
+        ready(text);
+      });
+    }
+    else {
+      ready("NOT FOUND");
+    }
   }
   
   void delete(Function ready()) {
-    _fsService.deleteFile(_entry, (e) {
+    if(_entry != null) {
+      _fsService.deleteFile(_entry, (e) {
+        ready();
+      });
+    }
+    else {
       ready();
-    });
+    }
   }
   
   FsService get fsService {

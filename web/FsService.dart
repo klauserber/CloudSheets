@@ -136,7 +136,10 @@ class FsService {
       _allSongsDir.getFile(name).then((FileEntry entry) {
         ready(entry);
       },
-      onError: fileErrorHandler);
+      onError: (e) {
+        print("not found: " + name);
+        ready(null);
+      });
     }
     
   }
