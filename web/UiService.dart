@@ -287,6 +287,7 @@ class UiService {
     
     SpanElement textSpan = new SpanElement();
     textSpan.text = s.title;
+    elem.dataset["key"] = s.key;
     elem.children.add(textSpan);
     
     SpanElement addSpan = new SpanElement();
@@ -312,7 +313,7 @@ class UiService {
   
   
   void loadSong(Song s) {
-    _songTitle.text = (s.pos + 1).toString() + ". " + s.title;
+    _songTitle.text = s.title;
     s.readText((String text) {
       _songBodyText.text = text;
       _songService.activeSong = s;
@@ -320,8 +321,13 @@ class UiService {
       SongSet ss = _setService.activeSet;
       if(ss != null) {
         ss.songPos = s.pos;
+        markListEntry(_setList, s.pos);
       }
-      markListEntry(ss != null ? _setList : _allSongsList, s.pos);
+      for(int i=0; i < _allSongsList.children.length; i++) {
+        if(_allSongsList.children[i].dataset["key"] == s.key) {
+          markListEntry(_allSongsList, i);
+        }
+      }
       updateUiState();
     });
   }
