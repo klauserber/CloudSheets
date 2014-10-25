@@ -32,6 +32,16 @@ class StoreEntity {
       ready("NOT FOUND");
     }
   }
+  void readMeta(Function ready(int size, DateTime modTime)) {
+    if(_entry != null) {
+      _entry.getMetadata().then((Metadata meta) {
+        ready(meta.size, meta.modificationTime);
+      });
+    }
+    else {
+      throw new StateError("Entry not set");
+    }
+  }
   
   void delete(Function ready()) {
     if(_entry != null) {

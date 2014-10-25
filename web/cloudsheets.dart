@@ -5,12 +5,14 @@ import 'FsService.dart';
 import 'SongService.dart';
 import 'SetService.dart';
 import 'UiService.dart';
+import 'CsExporter.dart';
 
 
 FsService fsService;
 SongService songService;
 SetService setService;
 UiService uiService;
+CsExporter csExporter;
 
 void main() {
   
@@ -18,7 +20,9 @@ void main() {
     print("fs initialized");
     songService = new SongService(fsService);
     setService = new SetService(fsService);
-    uiService = new UiService(fsService, songService, setService);
+    
+    csExporter = new CsExporter(songService, fsService, setService);
+    uiService = new UiService(fsService, songService, setService, csExporter);
     
     uiService.initApp();
   });

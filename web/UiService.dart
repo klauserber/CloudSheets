@@ -7,6 +7,7 @@ import 'CsBase.dart';
 import 'SongService.dart';
 import 'SetService.dart';
 import 'FsService.dart';
+import 'CsExporter.dart';
 
 class OperatingMode extends Enum<int>  {
   const OperatingMode(int value) : super(value);
@@ -21,6 +22,7 @@ class UiService {
   SongService _songService;
   SetService _setService;
   FsService _fsService;
+  CsExporter _csExporter;
  
   OperatingMode _mode;
   bool _songEditMode = false;
@@ -79,13 +81,18 @@ class UiService {
   HeadingElement _setTitleText;  
   UListElement _setList;
   
+  ButtonElement _importButton;
+  ButtonElement _exportButton;
+
+  AnchorElement _downloadExport;
   
   bool _sidebarVisible = true;
   
-  UiService(FsService fsService, SongService songService, SetService setService) {
+  UiService(FsService fsService, SongService songService, SetService setService, CsExporter csExporter) {
     _fsService = fsService;
     _songService = songService;
     _setService = setService;
+    _csExporter = csExporter;
   }
   
   void initApp() {
@@ -186,20 +193,18 @@ class UiService {
     _setStyles.insertRule(".addicon { display: inline }", 0);
         
     
+    _importButton = $("#importButton")[0];
+    _exportButton = $("#exportButton")[0];
     
-    $("#importButton").click((QueryEvent ev) {
+    _importButton.onClick.listen((e) {
       _filesInput.style.display = "inline";
       $("#alertUploadSuccess").hide();
     });
     
-    _filesInput.onChange.listen((e) => _fsService.uploadFiles(_filesInput.files, () {
-      print("files uploaded");
-      _filesInput.style.display = "none";
-      $("#alertUploadSuccess").show();
-      refreshAllSongsList();
-    }));  
+    _filesInput.onChange.listen((e) => importSongs());
     
-    
+    _exportButton.onClick.listen((e) => exportData());
+    _downloadExport = $("#downloadExport")[0];
     
     refreshAllSongsList();
     
@@ -209,6 +214,26 @@ class UiService {
     resetUi();
     
     setSizes();
+  }
+  
+  void exportData() {
+    _csExporter.export((String url) {
+      
+      _downloadExport.download = "cloudsheets.tar";
+      _downloadExport.href = url;
+      _downloadExport.text = "Download";
+      //window.alert("Export ok");
+      
+    });
+  }
+  
+  void importSongs() {
+    _fsService.uploadFiles(_filesInput.files, () {
+      print("files uploaded");
+      _filesInput.style.display = "none";
+      $("#alertUploadSuccess").show();
+      refreshAllSongsList();
+    });
   }
   
   void nextSong() {

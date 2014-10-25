@@ -3,7 +3,7 @@ library fsService;
 import 'dart:html';
 
 const int FS_SIZE = 1024 * 1024 * 5;
-
+const String EXPORT_FILE_NAME = "export_data";
 
 
 class FsService {
@@ -51,6 +51,7 @@ class FsService {
     );
   }
   
+  
   void uploadFiles(List<File> files, Function ready) {
     
     int counter = 0;
@@ -71,35 +72,37 @@ class FsService {
   } 
   
   void saveSongAsText(String name, String data, Function ready(FileEntry entry)) {
-    print(data);
-    _allSongsDir.getFile(name).then((FileEntry entry) {
-      deleteFile(entry, (e) {
-        saveFileAsText(_allSongsDir, name, data, (entry) {
-          ready(entry);
-        });        
-      });
-    }, onError: (e) {
-      saveFileAsText(_allSongsDir, name, data, (entry) {
-        ready(entry);
-      });
-    });
-    
+    saveFile(_allSongsDir, name, data, (FileEntry entry) {
+      ready(entry);      
+    });    
+  }
+
+  void saveExportFile(List<int> data, Function ready(FileEntry entry)) {
+    String dataStr = new String.fromCharCodes(data);
+    saveFile(_fsys.root, EXPORT_FILE_NAME, dataStr, (FileEntry entry) {
+      ready(entry);      
+    });    
   }
   
-  void saveSet(String name, String data, Function ready(FileEntry entry)) {
-    print(data);
-    _setsDir.getFile(name).then((FileEntry entry) {
+  void saveFile(DirectoryEntry dir, String name, String data, Function ready(FileEntry entry)) {
+    dir.getFile(name).then((FileEntry entry) {
       deleteFile(entry, (e) {
-        saveFileAsText(_setsDir, name, data, (entry) {
+        saveFileAsText(dir, name, data, (entry) {
           ready(entry);
         });        
       });
     }, onError: (e) {
-      saveFileAsText(_setsDir, name, data, (entry) {
+      saveFileAsText(dir, name, data, (entry) {
         ready(entry);
       });
     });
-    
+  }
+  
+  
+  void saveSet(String name, String data, Function ready(FileEntry entry)) {
+    saveFile(_setsDir, name, data, (FileEntry entry) {
+      ready(entry);      
+    });    
   }
   
   void saveFileAsText(DirectoryEntry dir, String name, String data, Function ready(FileEntry entry)) {

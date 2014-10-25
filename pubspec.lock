@@ -5,6 +5,10 @@ packages:
     description: analyzer
     source: hosted
     version: "0.22.4"
+  archive:
+    description: archive
+    source: hosted
+    version: "1.0.18"
   args:
     description: args
     source: hosted
@@ -21,6 +25,10 @@ packages:
     description: collection
     source: hosted
     version: "1.0.0"
+  crypto:
+    description: crypto
+    source: hosted
+    version: "0.9.0"
   dquery:
     description: dquery
     source: hosted
