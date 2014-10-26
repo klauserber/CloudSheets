@@ -62,8 +62,11 @@
               <span id="alertArchiveSuccess" style="display: none; margin-left: 25px;" class="alert alert-success">Archive imported</span>                   
             </div>
             <div>
-	            <button id="exportButton" class="btn btn-primary">Export Archive</button>
-	            <a id="downloadExport"></a>
+              <button id="exportButton" class="btn btn-primary">Export Archive</button>
+              <a id="downloadExport"></a>
+            </div>
+            <div>
+              <button id="deleteAllButton" class="btn btn-danger" data-toggle="modal" data-target=".delete-all-confirm">Delete All</button>
             </div>
 				  </div>
 				  <div class="tab-pane" id="allSetsContainer">
@@ -144,6 +147,23 @@
       </div>
     </div>  
 
+    <div class="modal fade delete-all-confirm" tabindex="-1" role="dialog" aria-labelledby="deleteAllConfirmLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title" id="deleteAllConfirmLabel">Delete All</h4>
+          </div>        
+          <div class="modal-body">
+            Delete All local Data (Songs and Sets)?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button id="deleteAllConfirmButton" type="button" class="btn btn-danger" data-dismiss="modal">Yes</button>
+          </div>      
+        </div>
+      </div>
+    </div>  
 
   </body>
 </html>

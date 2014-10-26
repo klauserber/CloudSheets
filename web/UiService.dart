@@ -88,6 +88,9 @@ class UiService {
 
   AnchorElement _downloadExport;
   
+  ButtonElement _deleteAllConfirmButton;
+  
+  
   bool _sidebarVisible = true;
   
   UiService(FsService fsService, SongService songService, SetService setService, CsTransfer csTransfer) {
@@ -215,6 +218,11 @@ class UiService {
     _exportButton.onClick.listen((e) => exportData());
     _downloadExport = $("#downloadExport")[0];
     
+
+    _deleteAllConfirmButton = $("#deleteAllConfirmButton")[0];
+    
+    _deleteAllConfirmButton.onClick.listen((e) => deleteAllData());
+    
     refreshAllSongsList();
     
     refreshAllSetsList();
@@ -223,6 +231,13 @@ class UiService {
     resetUi();
     
     setSizes();
+  }
+  
+  void deleteAllData() {
+    _fsService.deleteAllFiles(() {
+      refreshAllSongsList();
+      refreshAllSetsList();
+    });
   }
   
   void exportData() {

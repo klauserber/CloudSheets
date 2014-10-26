@@ -41,6 +41,10 @@ class FsService {
   
   void onRequestFileSystem(FileSystem fs) {
     _fsys = fs;
+    createStructure(_readyFunc);
+  }
+
+  void createStructure(Function ready()) {
     _fsys.root.createDirectory("cloudsheets").then(
       (DirectoryEntry dir) {
          dir.createDirectory("songs")
@@ -51,7 +55,7 @@ class FsService {
              .then((setsdir) {
                _setsDir = setsdir;
                print("sets dir: " + setsdir.toUrl());
-               _readyFunc();
+               ready();
              });
           });
       },
@@ -59,6 +63,13 @@ class FsService {
     );
   }
   
+  void deleteAllFiles(Function ready()) {
+    _allSongsDir.removeRecursively().then((e) {
+      _setsDir.removeRecursively().then((e) {
+        createStructure(ready);
+      });
+    });
+  }
   
   void uploadFiles(Iterable<File> files, Function ready) {
     
