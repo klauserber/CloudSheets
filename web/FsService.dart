@@ -19,6 +19,14 @@ class FsService {
     
   }
   
+  DirectoryEntry get allSongsDir {
+    return _allSongsDir;
+  }
+  
+  DirectoryEntry get setsDir {
+    return _setsDir;
+  }
+  
   void fileErrorHandler(FileError e) {
     window.alert(e.name + ", " + e.message);
     print(e.name + ", " + e.message);
@@ -52,7 +60,7 @@ class FsService {
   }
   
   
-  void uploadFiles(List<File> files, Function ready) {
+  void uploadFiles(Iterable<File> files, Function ready) {
     
     int counter = 0;
     for(File file in files) {

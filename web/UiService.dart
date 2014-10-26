@@ -7,7 +7,7 @@ import 'CsBase.dart';
 import 'SongService.dart';
 import 'SetService.dart';
 import 'FsService.dart';
-import 'CsExporter.dart';
+import 'CsTransfer.dart';
 
 class OperatingMode extends Enum<int>  {
   const OperatingMode(int value) : super(value);
@@ -22,7 +22,7 @@ class UiService {
   SongService _songService;
   SetService _setService;
   FsService _fsService;
-  CsExporter _csExporter;
+  CsTransfer _csTransfer;
  
   OperatingMode _mode;
   bool _songEditMode = false;
@@ -30,7 +30,6 @@ class UiService {
   ButtonElement _sidebarToggle;
   DivElement _sidebarContainer;
   DivElement _mainContent;
-  InputElement _filesInput;
   
   
   // Song elements 
@@ -82,17 +81,20 @@ class UiService {
   UListElement _setList;
   
   ButtonElement _importButton;
+  InputElement _filesInput;
+  ButtonElement _importArchiveButton;
+  InputElement _archiveInput;
   ButtonElement _exportButton;
 
   AnchorElement _downloadExport;
   
   bool _sidebarVisible = true;
   
-  UiService(FsService fsService, SongService songService, SetService setService, CsExporter csExporter) {
+  UiService(FsService fsService, SongService songService, SetService setService, CsTransfer csTransfer) {
     _fsService = fsService;
     _songService = songService;
     _setService = setService;
-    _csExporter = csExporter;
+    _csTransfer = csTransfer;
   }
   
   void initApp() {
@@ -110,7 +112,6 @@ class UiService {
     _sidebarContainer = $("#sidebarContainer")[0];
     _sidebarToggle = $("#sidebarToggle")[0];
     _mainContent = $("#mainContent")[0];
-    _filesInput = $("#filesInput")[0];
     
     
     // Song elements init
@@ -194,14 +195,22 @@ class UiService {
         
     
     _importButton = $("#importButton")[0];
+    _filesInput = $("#filesInput")[0];
+    _importArchiveButton = $("#importArchiveButton")[0];
+    _archiveInput = $("#archiveInput")[0];
     _exportButton = $("#exportButton")[0];
     
     _importButton.onClick.listen((e) {
       _filesInput.style.display = "inline";
       $("#alertUploadSuccess").hide();
     });
+    _importArchiveButton.onClick.listen((e) {
+      _archiveInput.style.display = "inline";
+      $("#alertArchiveSuccess").hide();
+    });
     
     _filesInput.onChange.listen((e) => importSongs());
+    _archiveInput.onChange.listen((e) => importArchive());
     
     _exportButton.onClick.listen((e) => exportData());
     _downloadExport = $("#downloadExport")[0];
@@ -217,24 +226,41 @@ class UiService {
   }
   
   void exportData() {
-    _csExporter.export((String url) {
+    _csTransfer.export((String url) {
       
       _downloadExport.download = "cloudsheets.tar";
       _downloadExport.href = url;
       _downloadExport.text = "Download";
-      //window.alert("Export ok");
       
     });
   }
   
   void importSongs() {
-    _fsService.uploadFiles(_filesInput.files, () {
-      print("files uploaded");
-      _filesInput.style.display = "none";
-      $("#alertUploadSuccess").show();
-      refreshAllSongsList();
-    });
+     
+     Iterable songs = _filesInput.files.where((File it) => !it.name.endsWith(".tar"));
+     
+     _fsService.uploadFiles(songs, () {
+       print("files uploaded");
+       _filesInput.style.display = "none";
+       $("#alertUploadSuccess").show();
+       refreshAllSongsList();
+     });
   }
+  
+  
+  void importArchive() {
+     
+     File archive = _archiveInput.files[0];
+     
+     _csTransfer.importArchive(archive, () {
+       _archiveInput.style.display = "none";
+       $("#alertArchiveSuccess").show();
+       refreshAllSongsList();
+       refreshAllSetsList();
+     });
+     
+
+   }
   
   void nextSong() {
     SongSet ss = _setService.activeSet;

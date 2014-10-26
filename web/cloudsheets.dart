@@ -5,14 +5,14 @@ import 'FsService.dart';
 import 'SongService.dart';
 import 'SetService.dart';
 import 'UiService.dart';
-import 'CsExporter.dart';
+import 'CsTransfer.dart';
 
 
 FsService fsService;
 SongService songService;
 SetService setService;
 UiService uiService;
-CsExporter csExporter;
+CsTransfer csTransfer;
 
 void main() {
   
@@ -21,8 +21,8 @@ void main() {
     songService = new SongService(fsService);
     setService = new SetService(fsService);
     
-    csExporter = new CsExporter(songService, fsService, setService);
-    uiService = new UiService(fsService, songService, setService, csExporter);
+    csTransfer = new CsTransfer(songService, fsService, setService);
+    uiService = new UiService(fsService, songService, setService, csTransfer);
     
     uiService.initApp();
   });

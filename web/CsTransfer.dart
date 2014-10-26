@@ -4,15 +4,16 @@ import 'dart:html';
 import 'SongService.dart';
 import 'SetService.dart';
 import 'FsService.dart';
+import 'CsBase.dart';
 import 'package:archive/archive.dart';
 
-class CsExporter {
+class CsTransfer {
   
   SongService _songService;
   FsService _fsService;
   SetService _setService;
   
-  CsExporter(SongService songService, FsService fsService, SetService setService) {
+  CsTransfer(SongService songService, FsService fsService, SetService setService) {
     _songService = songService;
     _fsService = fsService;
     _setService = setService;
@@ -75,7 +76,48 @@ class CsExporter {
     });    
     
   }
+  
+  
+  void importArchive(File archiveFile, Function ready()) {
+    
+    FileReader reader = new FileReader();
+    reader.onLoadEnd.listen((ProgressEvent e) {
+      List<int> data = reader.result;
+
+      Archive arch = new TarDecoder().decodeBytes(data);
+      
+      int counter = arch.length;
+      arch.forEach((ArchiveFile archFile) {
+        List<String> path = archFile.name.split("/");
+        bool isSet = path[2] == "sets";
+        bool isSong = path[2] == "songs";
+        String name = path[3];
+        int modTime = archFile.lastModTime;
+        print(name);
+        
+        String text = new String.fromCharCodes(archFile.content);
+        
+        StoreEntity ent = new StoreEntity(_fsService, null, name);
+        if(isSong) {
+          ent = new Song(_fsService, null, name);
+        }
+        else{
+          ent = new SongSet(_fsService, null, name);          
+        }
+        
+        ent.storeIfNewer(text, modTime, () {
+          if(--counter == 0) ready();
+        });
+        
+      });
+      
+    });
+    reader.readAsArrayBuffer(archiveFile);
+  }
+  
 }
+
+
 
 
 

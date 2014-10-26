@@ -24,6 +24,13 @@
 	overflow: auto;
 }
 
+#allSongsContainer button {
+  width: 130px;
+}
+#allSongsContainer div {
+  margin-top: 7px;
+}
+
 #mainContent {
   display: inline-block;
   width: 50%;

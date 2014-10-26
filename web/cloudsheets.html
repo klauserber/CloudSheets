@@ -51,11 +51,20 @@
 				  <div class="tab-pane active" id="allSongsContainer">
             <ul class="list-group orderedList" id="allSongsList">
             </ul>
-            <button id="importButton" class="btn btn-primary">Import</button>
-            <input style="display: none;" type="file" id="filesInput" name="files[]" multiple/>
-            <span id="alertUploadSuccess" style="display: none; margin-left: 25px;" class="alert alert-success">Files uploaded</span>         				  
-            <button id="exportButton" class="btn btn-primary">Export</button>
-            <a id="downloadExport"></a>
+            <div>
+	            <button id="importButton" class="btn btn-primary">Import Songs</button>
+	            <input style="display: none;" type="file" id="filesInput" name="files[]" multiple/>
+              <span id="alertUploadSuccess" style="display: none; margin-left: 25px;" class="alert alert-success">Files uploaded</span>                   
+            </div>
+            <div>
+	            <button id="importArchiveButton" class="btn btn-primary">Import Archive</button>
+	            <input style="display: none;" type="file" id="archiveInput" name="files[]"/>
+              <span id="alertArchiveSuccess" style="display: none; margin-left: 25px;" class="alert alert-success">Archive imported</span>                   
+            </div>
+            <div>
+	            <button id="exportButton" class="btn btn-primary">Export Archive</button>
+	            <a id="downloadExport"></a>
+            </div>
 				  </div>
 				  <div class="tab-pane" id="allSetsContainer">
 				    <div style="margin-bottom: 10px;">

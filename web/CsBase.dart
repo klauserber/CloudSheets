@@ -8,12 +8,22 @@ class StoreEntity {
   FileEntry _entry;
   FsService _fsService;
   String key;
+  Function _baseDir; 
   
   StoreEntity(FsService fsService, FileEntry entry, String key) {
     _entry = entry;
     _fsService = fsService;
     this.key = key;
   }
+  
+  DirectoryEntry getBaseDir() {
+    return _baseDir();
+  }
+  
+  set baseDir(Function getBase) {
+    _baseDir = getBase;
+  }
+  
   
   String get title {
     int pos = key.lastIndexOf(".");
@@ -52,6 +62,32 @@ class StoreEntity {
     else {
       ready();
     }
+  }
+  
+  void storeIfNewer(String text, int time, Function ready()) {
+    getBaseDir().getFile(key).then((FileEntry entry) {
+      _entry = entry;
+      readMeta((int size, DateTime modTime) {
+        if(time > modTime.millisecondsSinceEpoch) {
+          fsService.saveFile(getBaseDir(), key, text, (FileEntry newEntry) {
+            _entry = newEntry;
+            print(key + ": overriden");
+            ready();
+          });
+        } else {
+          print(key + ": skipped");
+          ready();
+        }
+      });
+    },
+    onError: (e) {
+      fsService.saveFile(getBaseDir(), key, text, (FileEntry newEntry) {
+        _entry = newEntry;
+        print(key + ": new");
+        ready();
+      });      
+    });
+
   }
   
   FsService get fsService {

@@ -45,6 +45,11 @@ class SongSet extends StoreEntity {
     return hasSongs() && songPos > 0;
   }
 
+
+  @override
+  DirectoryEntry getBaseDir() {
+    return fsService.setsDir;
+  }
 }
 
 class SetService {

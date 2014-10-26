@@ -8,6 +8,12 @@ class Song extends StoreEntity {
   int pos = -1;
   
   Song(FsService fsService, FileEntry entry, String key) : super(fsService, entry, key);
+  
+  @override
+  DirectoryEntry getBaseDir() {
+    return fsService.allSongsDir;
+  }
+  
 }
 
 class SongService {
