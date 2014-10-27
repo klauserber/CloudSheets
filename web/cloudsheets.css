@@ -16,7 +16,7 @@
 #sidebarContainer {
 	background-color: #f0f0f0;
 	padding: 10px;
-  width: 50%;
+  width: 55%;
   float: left;
 }
 
@@ -24,16 +24,19 @@
 	overflow: auto;
 }
 
-#allSongsContainer button {
+#manageContainer button {
   width: 130px;
 }
-#allSongsContainer div {
+#manageContainer div {
   margin-top: 7px;
+}
+#manageContainer input,a#downloadExport {
+  margin: 10px;
 }
 
 #mainContent {
   display: inline-block;
-  width: 50%;
+  width: 45%;
   padding: 0px 15px 0px 15px;
 }
 

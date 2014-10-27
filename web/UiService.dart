@@ -32,6 +32,10 @@ class UiService {
   DivElement _mainContent;
   
   
+  Tab _allSongsTab;
+  Tab _setsTab;
+  Tab _manageTab;
+  
   // Song elements 
   CssStyleSheet _songStyles;
   
@@ -90,6 +94,9 @@ class UiService {
   
   ButtonElement _deleteAllConfirmButton;
   
+  DivElement _successMessage;
+  Modal _successModal;
+  
   
   bool _sidebarVisible = true;
   
@@ -110,8 +117,7 @@ class UiService {
     window.onResize.listen((Event e) => setSizes());
     
     _mode = OperatingMode.SONG;
-
-    
+        
     _sidebarContainer = $("#sidebarContainer")[0];
     _sidebarToggle = $("#sidebarToggle")[0];
     _mainContent = $("#mainContent")[0];
@@ -125,6 +131,10 @@ class UiService {
     
     _songToolBar = $("#songToolBar")[0];
 
+    _allSongsTab = Tab.wire($("#allSongsTab")[0]);
+    _setsTab = Tab.wire($("#setsTab")[0]);
+    _manageTab = Tab.wire($("#manageTab")[0]);
+    
     _songNextButton = $("#songNextButton")[0];
     _songPrevButton = $("#songPrevButton")[0];
     _songEditButton = $("#songEditButton")[0];
@@ -205,11 +215,9 @@ class UiService {
     
     _importButton.onClick.listen((e) {
       _filesInput.style.display = "inline";
-      $("#alertUploadSuccess").hide();
     });
     _importArchiveButton.onClick.listen((e) {
       _archiveInput.style.display = "inline";
-      $("#alertArchiveSuccess").hide();
     });
     
     _filesInput.onChange.listen((e) => importSongs());
@@ -222,6 +230,9 @@ class UiService {
     _deleteAllConfirmButton = $("#deleteAllConfirmButton")[0];
     
     _deleteAllConfirmButton.onClick.listen((e) => deleteAllData());
+
+    _successMessage = $("#successMessage")[0];
+    _successModal = Modal.wire($("#successModal")[0]);
     
     refreshAllSongsList();
     
@@ -233,10 +244,16 @@ class UiService {
     setSizes();
   }
   
+  void showSuccessModal(String message) {
+    _successMessage.text = message;
+    _successModal.show();
+  }
+  
   void deleteAllData() {
     _fsService.deleteAllFiles(() {
       refreshAllSongsList();
       refreshAllSetsList();
+      showSuccessModal("All data is gone.");
     });
   }
   
@@ -257,8 +274,8 @@ class UiService {
      _fsService.uploadFiles(songs, () {
        print("files uploaded");
        _filesInput.style.display = "none";
-       $("#alertUploadSuccess").show();
        refreshAllSongsList();
+       showSuccessModal("Songs successfully imported.");
      });
   }
   
@@ -269,9 +286,9 @@ class UiService {
      
      _csTransfer.importArchive(archive, () {
        _archiveInput.style.display = "none";
-       $("#alertArchiveSuccess").show();
        refreshAllSongsList();
        refreshAllSetsList();
+       showSuccessModal("Archive successfully imported.");
      });
      
 
@@ -325,7 +342,7 @@ class UiService {
     if(val) window.scrollTo(0, 0);
     _sidebarVisible = val;
     _sidebarContainer.style.display = _sidebarVisible ? "block" : "none";
-    _mainContent.style.width = _sidebarVisible ? "50%" : "100%";
+    _mainContent.style.width = _sidebarVisible ? "45%" : "100%";
   }
   
   bool get sidebarVisible {
@@ -395,6 +412,7 @@ class UiService {
         }
       }
       updateUiState();
+
     });
   }
 

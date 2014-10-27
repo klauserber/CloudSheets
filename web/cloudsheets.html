@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html manifest="/cache.manifest">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -66,9 +66,22 @@
 	    <div id="sidebarContainer">
 	    
 				<!-- Nav tabs -->
-				<ul class="nav nav-tabs" role="tablist">
-				  <li class="active"><a href="#allSongsContainer" role="tab" data-toggle="tab">All Songs</a></li>
-				  <li><a href="#allSetsContainer" role="tab" data-toggle="tab">Sets</a></li>
+				<ul id="tabList" class="nav nav-tabs" role="tablist">
+				  <li id="allSongsTab" class="active">
+				    <a href="#allSongsContainer" id="allSongsTab" role="tab" data-toggle="tab">
+              Songs
+				    </a>				    
+				  </li>
+          <li id="setsTab">
+            <a href="#allSetsContainer" role="tab" data-toggle="tab">
+              Sets
+            </a>
+          </li>
+          <li id="manageTab">
+            <a href="#manageContainer" role="tab" data-toggle="tab">
+              Manage
+            </a>
+          </li>
 				</ul>
 
 				<!-- Tab panes -->
@@ -76,23 +89,6 @@
 				  <div class="tab-pane active" id="allSongsContainer">
             <ul class="list-group orderedList" id="allSongsList">
             </ul>
-            <div>
-	            <button id="importButton" class="btn btn-primary">Import Songs</button>
-	            <input style="display: none;" type="file" id="filesInput" name="files[]" multiple/>
-              <span id="alertUploadSuccess" style="display: none; margin-left: 25px;" class="alert alert-success">Files uploaded</span>                   
-            </div>
-            <div>
-	            <button id="importArchiveButton" class="btn btn-primary">Import Archive</button>
-	            <input style="display: none;" type="file" id="archiveInput" name="files[]"/>
-              <span id="alertArchiveSuccess" style="display: none; margin-left: 25px;" class="alert alert-success">Archive imported</span>                   
-            </div>
-            <div>
-              <button id="exportButton" class="btn btn-primary">Export Archive</button>
-              <a id="downloadExport"></a>
-            </div>
-            <div>
-              <button id="deleteAllButton" class="btn btn-danger" data-toggle="modal" data-target=".delete-all-confirm">Delete All</button>
-            </div>
 				  </div>
 				  <div class="tab-pane" id="allSetsContainer">
 				    <div style="margin-bottom: 10px;">
@@ -119,12 +115,29 @@
             <ul class="list-group orderedList" id="setList">
             </ul>
 				  </div>
+          <div class="tab-pane" id="manageContainer">
+            <div>
+              <button id="importButton" class="btn btn-primary">Import Songs</button>
+              <input style="display: none;" type="file" id="filesInput" name="files[]" multiple/>
+            </div>
+            <div>
+              <button id="importArchiveButton" class="btn btn-primary">Import Archive</button>
+              <input style="display: none;" type="file" id="archiveInput" name="files[]"/>
+            </div>
+            <div>
+              <button id="exportButton" class="btn btn-primary">Export Archive</button>
+              <a id="downloadExport"></a>
+            </div>
+            <div>
+              <button id="deleteAllButton" class="btn btn-danger" data-toggle="modal" data-target=".delete-all-confirm">Delete All</button>
+            </div>
+          </div>				  
 				</div>	    
 	    </div>
 	    <div id="mainContent"">
 	     <div id="songView">
 	       <h2 id="songTitle">Title</h2>
-	       <pre id="songBodyText"></pre>    
+	       <pre id="songBodyText"></pre>
 	
 	       <div class="form-group" style="margin-top: 15px;">
 	        <input type="text" id="songTitleInput" class="form-control" placeholder="Title"/>
@@ -195,6 +208,23 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             <button id="deleteAllConfirmButton" type="button" class="btn btn-danger" data-dismiss="modal">Yes</button>
+          </div>      
+        </div>
+      </div>
+    </div>  
+
+    <div id="successModal" class="modal fade success-confirm" tabindex="-1" role="dialog" aria-labelledby="successConfirmLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title" id="deleteAllConfirmLabel">Success</h4>
+          </div>        
+          <div id="successMessage" class="modal-body">
+            Operation successful.
+          </div>
+          <div class="modal-footer">
+            <button id="deleteAllConfirmButton" type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
           </div>      
         </div>
       </div>

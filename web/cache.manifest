@@ -1,0 +1,25 @@
+CACHE MANIFEST
+
+#version 1.0.0
+
+CACHE:
+
+#images
+
+
+#internal HTML documents
+http://raspberrypi.isium.de/pi/cs/cloudsheets.html
+
+#style sheets
+http://raspberrypi.isium.de/pi/cs/cloudsheets.css
+http://raspberrypi.isium.de/pi/cs/packages/bootjack/css/bootstrap.css
+
+#style sheet images
+
+
+#javascript files
+http://raspberrypi.isium.de/pi/cs/cloudsheets.dart.js
+http://raspberrypi.isium.de/pi/cs/packages/browser/dart.js
+
+NETWORK:
+*
