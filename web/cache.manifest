@@ -1,6 +1,6 @@
 CACHE MANIFEST
 
-#version 1.0.0
+#version 1.0.1
 
 CACHE:
 
@@ -20,6 +20,10 @@ http://raspberrypi.isium.de/pi/cs/packages/bootjack/css/bootstrap.css
 #javascript files
 http://raspberrypi.isium.de/pi/cs/cloudsheets.dart.js
 http://raspberrypi.isium.de/pi/cs/packages/browser/dart.js
+
+#font files
+http://raspberrypi.isium.de/pi/cs/packages/bootjack/fonts/glyphicons-halflings-regular.woff
+http://raspberrypi.isium.de/pi/cs/packages/bootjack/fonts/glyphicons-halflings-regular.ttf
 
 NETWORK:
 *

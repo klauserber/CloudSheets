@@ -96,6 +96,7 @@ class UiService {
   
   DivElement _successMessage;
   Modal _successModal;
+  Modal _deleteSongModal;
   
   
   bool _sidebarVisible = true;
@@ -105,7 +106,9 @@ class UiService {
     _songService = songService;
     _setService = setService;
     _csTransfer = csTransfer;
-  }
+    
+    initApp();
+ }
   
   void initApp() {
     Transition.use();
@@ -232,7 +235,11 @@ class UiService {
     _deleteAllConfirmButton.onClick.listen((e) => deleteAllData());
 
     _successMessage = $("#successMessage")[0];
+
+    _deleteSongModal = Modal.wire($("#deleteSongModal")[0]);
+      
     _successModal = Modal.wire($("#successModal")[0]);
+
     
     refreshAllSongsList();
     
@@ -506,6 +513,8 @@ class UiService {
   }
   
   void deleteSong() {
+    _deleteSongModal.hide();
+    
     Song s = _songService.activeSong;
     
     s.delete(() {

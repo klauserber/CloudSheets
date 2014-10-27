@@ -24,7 +24,6 @@ void main() {
     csTransfer = new CsTransfer(songService, fsService, setService);
     uiService = new UiService(fsService, songService, setService, csTransfer);
     
-    uiService.initApp();
   });
   
   
