@@ -87,3 +87,9 @@ body {
 h1, p {
 }
 
+@media (max-width: 767px) {
+	.button-text {
+	 display: none;
+	}
+}
+
