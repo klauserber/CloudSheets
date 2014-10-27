@@ -115,7 +115,7 @@ class UiService {
     Collapse.use();
     Modal.use();
     
-    Tab.use();
+    //Tab.use();
     
     window.onResize.listen((Event e) => setSizes());
     
@@ -324,7 +324,8 @@ class UiService {
     int h = window.innerHeight;
     _setContentContainer.style.height = "${h - 130}px";
     _allSongsContainer.style.height = "${h - 140}px";
-    _allSetsList.style.height = "${h - 215}px";
+    //_allSetsList.style.height = "${h - 215}px";
+    _setList.style.height = "${h - 250}px";
     _songBodyText.style.height = "${h - 130}px";
     _songBodyInput.style.height = "${h - 130}px";
     
@@ -595,17 +596,22 @@ class UiService {
     elem.children.add(deleteSpan);
     
     elem.onClick.listen((e) {
-      _setContentList.children.forEach((Element e) {
-        e.dataset.remove("mark");
-      });
-      elem.dataset["mark"] = "1";                        
+      if(elem.dataset["mark"] == "1") {
+        elem.dataset.remove("mark");
+      }     
+      else {
+        _setContentList.children.forEach((Element e) {
+          e.dataset.remove("mark");
+        });
+        elem.dataset["mark"] = "1";
+      }
     });
     
     List<Element> childs = _setContentList.children;
     if(atEnd) {
       childs.add(elem);      
     } else {
-      int idx = childs.length - 1;
+      int idx = childs.length;
       
       for(int i = 0; i < childs.length; i++) {
         if(childs[i].dataset["mark"] == "1") {

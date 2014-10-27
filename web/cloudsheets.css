@@ -20,7 +20,7 @@
   float: left;
 }
 
-#allSongsContainer, #allSetsContainer, #setContentContainer, #songBodyText {
+#allSongsContainer, #allSetsList, #setList, #setContentContainer, #songBodyText {
 	overflow: auto;
 }
 

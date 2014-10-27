@@ -10,8 +10,15 @@
     
     <script async type="application/dart" src="cloudsheets.dart"></script>
     <script async src="packages/browser/dart.js"></script>
+
+    <link rel="stylesheet" href="css/bootstrap.css">
+
+    <link rel="stylesheet" href="css/bootstrap-theme.css">
+
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.js"></script>
     
-    <link rel="stylesheet" href="packages/bootjack/css/bootstrap.css">
+    <!-- <link rel="stylesheet" href="packages/bootjack/css/bootstrap.css"> -->
     <link rel="stylesheet" href="cloudsheets.css">
   </head>
   <body>
@@ -72,17 +79,20 @@
 				<ul id="tabList" class="nav nav-tabs" role="tablist">
 				  <li id="allSongsTab" class="active">
 				    <a href="#allSongsContainer" id="allSongsTab" role="tab" data-toggle="tab">
-              Songs
+	            <span class="glyphicon glyphicon-music"></span>
+	            <span class="button-text"> Songs</span>
 				    </a>				    
 				  </li>
           <li id="setsTab">
             <a href="#allSetsContainer" role="tab" data-toggle="tab">
-              Sets
+              <span class="glyphicon glyphicon-th-list"></span>
+              <span class="button-text"> Sets</span>
             </a>
           </li>
           <li id="manageTab">
             <a href="#manageContainer" role="tab" data-toggle="tab">
-              Manage
+              <span class="glyphicon glyphicon-cog"></span>
+              <span class="button-text"> Setting</span>
             </a>
           </li>
 				</ul>
