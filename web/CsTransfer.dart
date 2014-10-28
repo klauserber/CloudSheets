@@ -23,6 +23,11 @@ class CsTransfer {
     _songService.getAllSongs((List<Song> songs) {
       Archive arch = new Archive();
       int counter = songs.length;
+      if(counter == 0) {
+        exportSets(arch, () {
+          buildArchive(arch, ready);
+        });        
+      }
       songs.forEach((Song song) {
         song.readMeta((int size, DateTime modTime) {
           print(modTime.toString() + ": " + modTime.millisecondsSinceEpoch.toString());
@@ -36,26 +41,32 @@ class CsTransfer {
             
             if(--counter == 0) {
               exportSets(arch, () {
-                //List<int> res = new ZipEncoder().encode(arch, level:Deflate.NO_COMPRESSION);
-                List<int> res = new TarEncoder().encode(arch);
-                _fsService.saveExportFile(res, (FileEntry entry) {
-                  ready(entry.toUrl());
-                });
+                buildArchive(arch, ready);
               });
             }
           });
-          
         });
       });
     });
     
     
   }
+
+  void buildArchive(Archive arch, Function ready(String url)) {
+    //List<int> res = new ZipEncoder().encode(arch, level:Deflate.NO_COMPRESSION);
+    List<int> res = new TarEncoder().encode(arch);
+    _fsService.saveExportFile(res, (FileEntry entry) {
+      ready(entry.toUrl());
+    });
+  }
   
   void exportSets(Archive arch, Function ready()) {
     
     _setService.getAllSets((List<SongSet> ssList) {
       int counter = ssList.length;
+      if(counter == 0) {
+        ready();
+      }
       ssList.forEach((SongSet ss) {
         ss.readMeta((int size, DateTime modTime) {
           ss.readText((String text) {
@@ -82,7 +93,7 @@ class CsTransfer {
     
     FileReader reader = new FileReader();
     reader.onLoadEnd.listen((ProgressEvent e) {
-      List<int> data = reader.result;
+      List<int> data = (reader.result as String).codeUnits;
 
       Archive arch = new TarDecoder().decodeBytes(data);
       
@@ -112,7 +123,7 @@ class CsTransfer {
       });
       
     });
-    reader.readAsArrayBuffer(archiveFile);
+    reader.readAsText(archiveFile);
   }
   
 }

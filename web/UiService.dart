@@ -324,7 +324,6 @@ class UiService {
     int h = window.innerHeight;
     _setContentContainer.style.height = "${h - 130}px";
     _allSongsContainer.style.height = "${h - 140}px";
-    //_allSetsList.style.height = "${h - 215}px";
     _setList.style.height = "${h - 250}px";
     _songBodyText.style.height = "${h - 130}px";
     _songBodyInput.style.height = "${h - 130}px";
