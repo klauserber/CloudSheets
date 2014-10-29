@@ -21,7 +21,7 @@
     <!-- <link rel="stylesheet" href="packages/bootjack/css/bootstrap.css"> -->
     <link rel="stylesheet" href="cloudsheets.css">
   </head>
-  <body>
+  <body style="width: 100%;">
 
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="nav-left">
@@ -129,6 +129,7 @@
             </ul>
 				  </div>
           <div class="tab-pane" id="manageContainer">
+            <h4>Manage Data</h4>
             <div>
               <button id="importButton" class="btn btn-primary">Import Songs</button>
               <input style="display: none;" type="file" id="filesInput" name="files[]" multiple/>
@@ -143,6 +144,11 @@
             </div>
             <div>
               <button id="deleteAllButton" class="btn btn-danger" data-toggle="modal" data-target=".delete-all-confirm">Delete All</button>
+            </div>
+            
+            <h4 style="margin-top: 25px;">Options</h4>
+            <div>
+              <button id="fullscreenButton" class="btn btn-primary">Fullscreen</button>
             </div>
           </div>				  
 				</div>	    

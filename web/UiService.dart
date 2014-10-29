@@ -89,6 +89,7 @@ class UiService {
   ButtonElement _importArchiveButton;
   InputElement _archiveInput;
   ButtonElement _exportButton;
+  ButtonElement _fullscreenButton;
 
   AnchorElement _downloadExport;
   
@@ -215,6 +216,7 @@ class UiService {
     _importArchiveButton = $("#importArchiveButton")[0];
     _archiveInput = $("#archiveInput")[0];
     _exportButton = $("#exportButton")[0];
+    _fullscreenButton = $("#fullscreenButton")[0];
     
     _importButton.onClick.listen((e) {
       _filesInput.style.display = "inline";
@@ -228,6 +230,8 @@ class UiService {
     
     _exportButton.onClick.listen((e) => exportData());
     _downloadExport = $("#downloadExport")[0];
+
+    _fullscreenButton.onClick.listen((e) => document.body.requestFullscreen());
     
 
     _deleteAllConfirmButton = $("#deleteAllConfirmButton")[0];
