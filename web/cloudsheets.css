@@ -49,6 +49,9 @@
   padding: 0px 15px 0px 15px;
 }
 
+.container-fluid {
+	padding: 0px;
+}
 
 .toright {
 	float: right;

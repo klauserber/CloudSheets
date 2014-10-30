@@ -27,6 +27,9 @@ class UiService {
  
   OperatingMode _mode;
   bool _songEditMode = false;
+
+  int touchStartX;
+
   
   ButtonElement _sidebarToggle;
   DivElement _sidebarContainer;
@@ -263,6 +266,46 @@ class UiService {
     resetUi();
     
     setSizes();
+    
+    initSwiping();
+  }
+  
+  
+  void initSwiping() {
+
+    _songBodyText.onTouchStart.listen((TouchEvent event) {
+      //event.preventDefault();
+
+      if (event.touches.length > 0) {
+        touchStartX = event.touches[0].page.x;
+      }
+    });
+
+    _songBodyText.onTouchMove.listen((TouchEvent event) {
+
+      if (touchStartX != null && event.touches.length > 0) {
+        int newTouchX = event.touches[0].page.x;
+        //print("start: $touchStartX, new: $newTouchX");
+        
+        if (newTouchX - 150 > touchStartX) {
+          event.preventDefault();
+          prevSong();
+          touchStartX = null;
+        } else if (newTouchX + 150 < touchStartX) {
+          event.preventDefault();
+          nextSong();
+          touchStartX = null;
+        }
+      }
+    });
+
+    _songBodyText.onTouchEnd.listen((TouchEvent event) {
+      //event.preventDefault();
+
+      touchStartX = null;
+    });    
+    
+    
   }
   
 
@@ -357,7 +400,8 @@ class UiService {
     _setContentContainer.style.height = "${h - 130}px";
     _allSongsContainer.style.height = "${h - 140}px";
     _setList.style.height = "${h - 250}px";
-    _songBodyText.style.height = "${h - 130}px";
+    
+    _songBodyText.style.height = "${h - _songTitle.getBoundingClientRect().height - 100}px";
     _songBodyInput.style.height = "${h - 130}px";
     
     optimizeSetToolbar();
@@ -401,6 +445,7 @@ class UiService {
     _sidebarVisible = val;
     _sidebarContainer.style.display = _sidebarVisible ? "block" : "none";
     _mainContent.style.width = _sidebarVisible ? "45%" : "100%";
+    setSizes();
   }
   
   bool get sidebarVisible {
@@ -546,7 +591,7 @@ class UiService {
     _songStyles.disabled = !(_mode == OperatingMode.SONG);
     _setStyles.disabled = !(_mode == OperatingMode.SET);
     
-    optimizeSetToolbar();
+    setSizes();
     
   } 
   
