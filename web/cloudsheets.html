@@ -100,7 +100,7 @@
 				<!-- Tab panes -->
 				<div class="tab-content" style="background-color: white; padding: 10px;">
 				  <div class="tab-pane active" id="allSongsContainer">
-            <ul class="list-group orderedList" id="allSongsList">
+            <ul class="list-group orderedList large-font" id="allSongsList">
             </ul>
 				  </div>
 				  <div class="tab-pane" id="allSetsContainer">
@@ -123,9 +123,9 @@
               </button>
 				    </div>
 				    <h3 id="setTitleText"></h3>
-            <ul class="list-group" id="allSetsList">
+            <ul class="list-group large-font" id="allSetsList">
             </ul>
-            <ul class="list-group orderedList" id="setList">
+            <ul class="list-group orderedList large-font" id="setList">
             </ul>
 				  </div>
           <div class="tab-pane" id="manageContainer">
@@ -150,6 +150,10 @@
             <div>
               <button id="fullscreenButton" class="btn btn-primary">Fullscreen</button>
             </div>
+            <div>
+              <button id="updateButton" class="btn btn-primary">Update App</button>
+              <span id="versionLabel"></span>
+            </div>
           </div>				  
 				</div>	    
 	    </div>
@@ -170,7 +174,7 @@
           <input type="text" id="setTitleInput" class="form-control" placeholder="Set Title"/>
          </div>
          <div class="form-group" id="setContentContainer">
-           <ul class="list-group orderedList" id="setContentList">
+           <ul class="list-group orderedList large-font" id="setContentList">
            </ul>
          </div>
        </div>

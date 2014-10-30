@@ -3,6 +3,7 @@ library uiService;
 import 'dart:html';
 import 'package:bootjack/bootjack.dart';
 import 'package:dquery/dquery.dart';
+import 'CsConst.dart';
 import 'CsBase.dart';
 import 'SongService.dart';
 import 'SetService.dart';
@@ -91,6 +92,10 @@ class UiService {
   ButtonElement _exportButton;
   ButtonElement _fullscreenButton;
 
+  ButtonElement _updateButton;
+  SpanElement _versionLabel;
+  
+  
   AnchorElement _downloadExport;
   
   ButtonElement _deleteAllConfirmButton;
@@ -218,6 +223,10 @@ class UiService {
     _exportButton = $("#exportButton")[0];
     _fullscreenButton = $("#fullscreenButton")[0];
     
+    _updateButton = $("#updateButton")[0];
+    _versionLabel = $("#versionLabel")[0];
+    _versionLabel.text = "$CS_VERSION";
+    
     _importButton.onClick.listen((e) {
       _filesInput.style.display = "inline";
     });
@@ -232,6 +241,7 @@ class UiService {
     _downloadExport = $("#downloadExport")[0];
 
     _fullscreenButton.onClick.listen((e) => document.body.requestFullscreen());
+    _updateButton.onClick.listen((e) => updateApp());    
     
 
     _deleteAllConfirmButton = $("#deleteAllConfirmButton")[0];
@@ -253,6 +263,23 @@ class UiService {
     resetUi();
     
     setSizes();
+  }
+  
+
+  void updateApp() {
+    ApplicationCache cache = window.applicationCache;
+    
+    cache.onUpdateReady.listen((e) {
+      cache.swapCache();
+      window.location.reload();
+    });
+    cache.onNoUpdate.listen((e) {
+      _successMessage.text = "You have already the newest Version.";
+      _successModal.show();
+    });
+    
+    cache.update();
+    
   }
   
   void showSuccessModal(String message) {

@@ -24,15 +24,24 @@
 	overflow: auto;
 }
 
+.large-font {
+	font-size: 1.2em;
+}
+
 #manageContainer button {
+  width: 130px;
+}
+#versionLabel {
+	display: inline-block;
   width: 130px;
 }
 #manageContainer div {
   margin-top: 7px;
 }
-#manageContainer input,a#downloadExport {
+#manageContainer input,a#downloadExport,#versionLabel {
   margin: 10px;
 }
+ 
 
 #mainContent {
   display: inline-block;
