@@ -353,12 +353,32 @@ class UiService {
   void setSizes() {
     
     int h = window.innerHeight;
+    
     _setContentContainer.style.height = "${h - 130}px";
     _allSongsContainer.style.height = "${h - 140}px";
     _setList.style.height = "${h - 250}px";
     _songBodyText.style.height = "${h - 130}px";
     _songBodyInput.style.height = "${h - 130}px";
     
+    optimizeSetToolbar();
+    
+  }
+
+  void optimizeSetToolbar() {
+    if(window.innerWidth <= 480) {
+      if(_setService.activeSet == null) {
+        setVisible(_setEditButton, false, true);
+        setVisible(_setNewButton, true, true);
+      }
+      else {
+        setVisible(_setEditButton, true, true);
+        setVisible(_setNewButton, false, true);        
+      }
+    }
+    else {
+      setVisible(_setEditButton, true, true);
+      setVisible(_setNewButton, true, true);              
+    }
   }
 
   
@@ -526,10 +546,14 @@ class UiService {
     _songStyles.disabled = !(_mode == OperatingMode.SONG);
     _setStyles.disabled = !(_mode == OperatingMode.SET);
     
+    optimizeSetToolbar();
+    
   } 
   
-  void setVisible(Element elem, bool visible) {
-    elem.style.display = visible ? "block" : "none";
+  void setVisible(Element elem, bool visible, [bool inline = false]) {
+    String typ = inline ? "inline" : "block";
+    
+    elem.style.display = visible ? typ : "none";
   }
   
   
