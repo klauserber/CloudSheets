@@ -38,7 +38,7 @@
 #manageContainer div {
   margin-top: 7px;
 }
-#manageContainer input,a#downloadExport,#versionLabel {
+#manageContainer span, #manageContainer a, #manageContainer input {
   margin: 10px;
 }
  

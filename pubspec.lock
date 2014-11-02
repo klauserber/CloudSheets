@@ -33,6 +33,22 @@ packages:
     description: dquery
     source: hosted
     version: "0.7.0+6"
+  googleapis:
+    description: googleapis
+    source: hosted
+    version: "0.1.1"
+  googleapis_auth:
+    description: googleapis_auth
+    source: hosted
+    version: "0.1.1"
+  http:
+    description: http
+    source: hosted
+    version: "0.11.1+1"
+  http_parser:
+    description: http_parser
+    source: hosted
+    version: "0.0.2+5"
   intl:
     description: intl
     source: hosted
@@ -61,10 +77,18 @@ packages:
     description: rikulo_ui
     source: hosted
     version: "0.7.3+1"
+  source_span:
+    description: source_span
+    source: hosted
+    version: "1.0.0"
   stack_trace:
     description: stack_trace
     source: hosted
     version: "1.0.2"
+  string_scanner:
+    description: string_scanner
+    source: hosted
+    version: "0.1.1"
   watcher:
     description: watcher
     source: hosted

@@ -1,6 +1,7 @@
 library csBase;
 
 import 'dart:html';
+import 'dart:async';
 import 'FsService.dart';
 
 class StoreEntity {
@@ -42,15 +43,20 @@ class StoreEntity {
       ready("NOT FOUND");
     }
   }
-  void readMeta(Function ready(int size, DateTime modTime)) {
+  
+  Future<StoreEntityMetaData> readMeta() {
+    Completer cp = new Completer();
+    
     if(_entry != null) {
       _entry.getMetadata().then((Metadata meta) {
-        ready(meta.size, meta.modificationTime);
+        cp.complete(new StoreEntityMetaData(meta.size, meta.modificationTime));
       });
     }
     else {
-      throw new StateError("Entry not set");
+      cp.completeError(new StateError("Entry not set"));
     }
+    
+    return cp.future;
   }
   
   void delete(Function ready()) {
@@ -67,8 +73,8 @@ class StoreEntity {
   void storeIfNewer(String text, int time, Function ready()) {
     getBaseDir().getFile(key).then((FileEntry entry) {
       _entry = entry;
-      readMeta((int size, DateTime modTime) {
-        if(time > modTime.millisecondsSinceEpoch) {
+      readMeta().then((meta) {
+        if(time > meta.modTime.millisecondsSinceEpoch) {
           fsService.saveFile(getBaseDir(), key, text, (FileEntry newEntry) {
             _entry = newEntry;
             print(key + ": overriden");
@@ -90,9 +96,39 @@ class StoreEntity {
 
   }
   
+  
+  
+  void store(String text, Function ready()) {
+    getBaseDir().getFile(key).then((FileEntry entry) {
+      _entry = entry;
+      fsService.saveFile(getBaseDir(), key, text, (FileEntry newEntry) {
+        _entry = newEntry;
+        print(key + ": overriden");
+        ready();
+      });
+    }, onError: (e) {
+      fsService.saveFile(getBaseDir(), key, text, (FileEntry newEntry) {
+        _entry = newEntry;
+        print(key + ": new");
+        ready();
+      });      
+    });
+  }
+  
   FsService get fsService {
    return _fsService; 
   }
+}
+
+class StoreEntityMetaData {
+  int size;
+  DateTime modTime;
+  
+  StoreEntityMetaData(int size, DateTime modTime) {
+    this.size = size;
+    this.modTime = modTime;
+  }
+  
 }
 
 /**

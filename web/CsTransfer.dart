@@ -29,14 +29,14 @@ class CsTransfer {
         });        
       }
       songs.forEach((Song song) {
-        song.readMeta((int size, DateTime modTime) {
-          print(modTime.toString() + ": " + modTime.millisecondsSinceEpoch.toString());
+        song.readMeta().then((meta) {
+          print(meta.modTime.toString() + ": " + meta.modTime.millisecondsSinceEpoch.toString());
           song.readText((String text) {
-            ArchiveFile file = new ArchiveFile("/cloudsheets/songs/" + song.key, size, text.codeUnits);
+            ArchiveFile file = new ArchiveFile("/cloudsheets/songs/" + song.key, meta.size, text.codeUnits);
             file.mode = 436;
             file.ownerId = 0;
             file.groupId = 0;
-            file.lastModTime = modTime.millisecondsSinceEpoch ~/ 1000;
+            file.lastModTime = meta.modTime.millisecondsSinceEpoch ~/ 1000;
             arch.addFile(file);
             
             if(--counter == 0) {
@@ -68,13 +68,13 @@ class CsTransfer {
         ready();
       }
       ssList.forEach((SongSet ss) {
-        ss.readMeta((int size, DateTime modTime) {
+        ss.readMeta().then((meta) {
           ss.readText((String text) {
-            ArchiveFile file = new ArchiveFile("/cloudsheets/sets/" + ss.key, size, text.codeUnits);
+            ArchiveFile file = new ArchiveFile("/cloudsheets/sets/" + ss.key, meta.size, text.codeUnits);
             file.mode = 436;
             file.ownerId = 0;
             file.groupId = 0;
-            file.lastModTime = modTime.millisecondsSinceEpoch ~/ 1000;
+            file.lastModTime = meta.modTime.millisecondsSinceEpoch ~/ 1000;
             
             
             arch.addFile(file);

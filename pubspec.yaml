@@ -5,3 +5,6 @@ dependencies:
   rikulo_ui:
   bootjack:
   archive:
+  googleapis: ">=0.1.0 <0.2.0"
+  googleapis_auth: ">=0.1.0 <0.2.0"
+

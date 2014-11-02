@@ -9,6 +9,8 @@ import 'SongService.dart';
 import 'SetService.dart';
 import 'FsService.dart';
 import 'CsTransfer.dart';
+import 'CloudProviderDrive.dart';
+
 
 class OperatingMode extends Enum<int>  {
   const OperatingMode(int value) : super(value);
@@ -24,6 +26,10 @@ class UiService {
   SetService _setService;
   FsService _fsService;
   CsTransfer _csTransfer;
+  
+  bool _online;
+
+  CloudProviderDrive _cloudProviderDrive; 
  
   OperatingMode _mode;
   bool _songEditMode = false;
@@ -98,6 +104,9 @@ class UiService {
   ButtonElement _updateButton;
   SpanElement _versionLabel;
   
+  ButtonElement _driveButton;
+  ButtonElement _driveSyncButton;
+  SpanElement _driveStatusLabel;
   
   AnchorElement _downloadExport;
   
@@ -110,12 +119,15 @@ class UiService {
   
   bool _sidebarVisible = true;
   
-  UiService(FsService fsService, SongService songService, SetService setService, CsTransfer csTransfer) {
+  UiService(FsService fsService, SongService songService, SetService setService, CsTransfer csTransfer, CloudProviderDrive cloudProviderDrive) {
     _fsService = fsService;
     _songService = songService;
     _setService = setService;
     _csTransfer = csTransfer;
     
+    _cloudProviderDrive = cloudProviderDrive;
+    
+    initAppCache();
     initApp();
  }
   
@@ -127,6 +139,11 @@ class UiService {
     //Tab.use();
     
     window.onResize.listen((Event e) => setSizes());
+    
+    _online = window.navigator.onLine;
+    
+    window.onOnline.listen((_) => goOnline());
+    window.onOffline.listen((_) => goOffline());
     
     _mode = OperatingMode.SONG;
         
@@ -257,6 +274,14 @@ class UiService {
       
     _successModal = Modal.wire($("#successModal")[0]);
 
+    _driveButton = $("#driveButton")[0];
+    _driveSyncButton = $("#driveSyncButton")[0];
+    _driveStatusLabel = $("#driveStatusLabel")[0];
+    _cloudProviderDrive.onStatus.listen((String status) => driveStatusChange(status));
+    _driveButton.onClick.listen((e) => _cloudProviderDrive.authorize());    
+    _driveSyncButton.onClick.listen((e) => syncWithDrive());    
+    
+    
     
     refreshAllSongsList();
     
@@ -268,8 +293,67 @@ class UiService {
     setSizes();
     
     initSwiping();
+    
+    if(_online) {
+      goOnline();
+    }
+    else {
+      goOffline();
+    }
   }
   
+  void driveStatusChange(String status) {
+    _driveStatusLabel.text = status;
+    if(status == "not authorized") {
+      _driveButton.disabled = false;
+    }
+    else {
+      _driveButton.disabled = true;      
+    }
+    if(status == "authorized") {
+      _driveSyncButton.disabled = false;
+    }
+    else {
+      _driveSyncButton.disabled = true;      
+    }
+  }
+  
+  
+  void goOffline() {
+    _online = false;
+    _driveButton.disabled = true;
+    _driveSyncButton.disabled = true;
+    _driveStatusLabel.text = "offline";
+  }
+  
+  void goOnline() {
+    _online = true;
+    _cloudProviderDrive.init();
+    _driveButton.disabled = false;
+    _driveSyncButton.disabled = false;
+  }
+  
+  void syncWithDrive() {
+    
+    _songService.getAllSongs((List<Song> songs) {
+      _cloudProviderDrive.syncSongs(songs).then((_) {
+        print("sync ok");
+      });      
+    });
+  }
+  
+  void initAppCache() {
+    ApplicationCache cache = window.applicationCache;
+    
+    cache.onUpdateReady.listen((e) {
+      cache.swapCache();
+      window.location.reload();
+    });
+    cache.onNoUpdate.listen((e) {
+      _successMessage.text = "You have already the newest Version.";
+      _successModal.show();
+    });
+  }
   
   void initSwiping() {
 
@@ -310,20 +394,9 @@ class UiService {
   
 
   void updateApp() {
-    ApplicationCache cache = window.applicationCache;
-    
-    cache.onUpdateReady.listen((e) {
-      cache.swapCache();
-      window.location.reload();
-    });
-    cache.onNoUpdate.listen((e) {
-      _successMessage.text = "You have already the newest Version.";
-      _successModal.show();
-    });
-    
-    cache.update();
-    
+    window.applicationCache.update();
   }
+
   
   void showSuccessModal(String message) {
     _successMessage.text = message;
