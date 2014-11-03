@@ -115,7 +115,6 @@ class CloudProviderDrive {
     _statusStreamController.add("syncing ...");
     
     _searchDriveFiles(driveDir).then((Map<String, drive.File> driveFiles) {
-      List<Future> tasks = [];
       int taskCount = 0;
       Set<String> workList = new Set.from(driveFiles.keys);
       
@@ -123,31 +122,31 @@ class CloudProviderDrive {
       entities.forEach((it) => localEntities[it.key] = it);
       
       workList.addAll(localEntities.keys);
-      
+      int counter = workList.length; 
+      Function taskEnded = () {
+        if(--counter == 0) {
+          _statusStreamController.add("authorized");          
+          completer.complete();
+        }
+      };
       workList.forEach((it) {
         drive.File drv = driveFiles[it];
         StoreEntity local = localEntities[it]; 
         
-        //Future task = new Future(() => );
         if(drv != null && local != null) {
           taskCount++;
           local.readMeta().then((meta) {
             if(drv.modifiedDate.isAfter(meta.modTime)) {
-              _copyDriveToLocal(drv, local);
+              _copyDriveToLocal(drv, local).whenComplete(() => taskEnded());
             }
             else {
-              _copyLocalToDrive(drv, local);              
+              _copyLocalToDrive(drv, local).whenComplete(() => taskEnded());
             }
           });
         }
         
       });
       
-      print("task count: " + tasks.length.toString());
-      Future.wait(tasks).then((_) {
-        _statusStreamController.add("authorized");
-        completer.complete(); 
-      });
     });
     
     return completer.future;
@@ -227,6 +226,7 @@ class CloudProviderDrive {
   Future<drive.ParentReference> _initSubDir(drive.ParentReference parent, String dirTitle) {
     
     Completer completer = new Completer();
+    
 
     String query = "title = '${dirTitle}' and mimeType = '$MIME_TYPE_FOLDER' and '${parent.id}' in parents and trashed = false";
     
@@ -253,7 +253,8 @@ class CloudProviderDrive {
     return completer.future;    
     
   }
-  
-  
-  
+}
+
+class SyncJob {
+    
 }
