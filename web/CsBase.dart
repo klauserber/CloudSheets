@@ -10,6 +10,7 @@ class StoreEntity {
   FsService _fsService;
   String key;
   Function _baseDir; 
+  StoreEntityMetaData _meta;
   
   StoreEntity(FsService fsService, FileEntry entry, String key) {
     _entry = entry;
@@ -48,8 +49,9 @@ class StoreEntity {
     Completer cp = new Completer();
     
     if(_entry != null) {
-      _entry.getMetadata().then((Metadata meta) {
-        cp.complete(new StoreEntityMetaData(meta.size, meta.modificationTime));
+      _entry.getMetadata().then((Metadata metadata) {
+        _meta = new StoreEntityMetaData(metadata.size, metadata.modificationTime);
+        cp.complete(_meta);
       });
     }
     else {
@@ -58,6 +60,7 @@ class StoreEntity {
     
     return cp.future;
   }
+  
   
   void delete(Function ready()) {
     if(_entry != null) {
@@ -118,6 +121,16 @@ class StoreEntity {
   FsService get fsService {
    return _fsService; 
   }
+  
+  StoreEntityMetaData get meta {
+    if(_meta != null) {
+      return _meta;
+    }
+    else {
+      throw new StateError("call readMeta first");
+    }
+  }
+  
 }
 
 class StoreEntityMetaData {

@@ -136,11 +136,14 @@ class CloudProviderDrive {
         if(drv != null && local != null) {
           taskCount++;
           local.readMeta().then((meta) {
-            if(drv.modifiedDate.isAfter(meta.modTime)) {
+            if(drv.modifiedDate.millisecondsSinceEpoch > meta.modTime.millisecondsSinceEpoch) {
               _copyDriveToLocal(drv, local).whenComplete(() => taskEnded());
             }
-            else {
+            else if(meta.modTime.millisecondsSinceEpoch > drv.modifiedDate.millisecondsSinceEpoch) {
               _copyLocalToDrive(drv, local).whenComplete(() => taskEnded());
+            }
+            else {
+              taskEnded();
             }
           });
         }
@@ -158,10 +161,10 @@ class CloudProviderDrive {
     print("local -> drv: " + drv.title);
     
     local.readText((text) {
+      drv.modifiedDate = local.meta.modTime.toUtc();
       Stream<List<int>> stream = new Stream.fromFuture(new Future(() => text.codeUnits));
       common.Media media = new common.Media(stream, text.length);
-      _driveApi.files.update(drv, drv.id, uploadMedia: media);
-      cp.complete();
+      _driveApi.files.update(drv, drv.id, setModifiedDate: true, uploadMedia: media).then((file) => cp.complete());
     });
     
     return cp.future;
