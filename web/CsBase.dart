@@ -4,6 +4,8 @@ import 'dart:html';
 import 'dart:async';
 import 'FsService.dart';
 
+const String STORAGE_PREFIX = "cloudsheets.entities.";
+
 class StoreEntity {
   
   FileEntry _entry;
