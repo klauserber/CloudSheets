@@ -1,4 +1,3 @@
-import 'FsService.dart';
 import 'SongService.dart';
 import 'SetService.dart';
 import 'UiService.dart';
@@ -8,29 +7,19 @@ import 'CloudProviderDrive.dart';
 
 CloudProviderDrive cloudProviderDrive;
 
-FsService fsService;
 SongService songService;
 SetService setService;
 UiService uiService;
 CsTransfer csTransfer;
 
 void main() {
+  cloudProviderDrive = new CloudProviderDrive();
   
-  fsService = new FsService(() {
-    print("fs initialized");
-    
-    cloudProviderDrive = new CloudProviderDrive();
-    
-    songService = new SongService(fsService);
-    setService = new SetService(fsService);
-    
-    csTransfer = new CsTransfer(songService, fsService, setService);
-    uiService = new UiService(fsService, songService, setService, csTransfer, cloudProviderDrive);
-    
-  });
+  songService = new SongService();
+  setService = new SetService();
   
-  
-  
+  csTransfer = new CsTransfer(songService, setService);
+  uiService = new UiService(songService, setService, csTransfer, cloudProviderDrive);
 }
 
 

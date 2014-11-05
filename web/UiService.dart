@@ -7,7 +7,6 @@ import 'CsConst.dart';
 import 'CsBase.dart';
 import 'SongService.dart';
 import 'SetService.dart';
-import 'FsService.dart';
 import 'CsTransfer.dart';
 import 'CloudProviderDrive.dart';
 
@@ -24,7 +23,6 @@ class UiService {
   
   SongService _songService;
   SetService _setService;
-  FsService _fsService;
   CsTransfer _csTransfer;
   
   bool _online;
@@ -119,8 +117,7 @@ class UiService {
   
   bool _sidebarVisible = true;
   
-  UiService(FsService fsService, SongService songService, SetService setService, CsTransfer csTransfer, CloudProviderDrive cloudProviderDrive) {
-    _fsService = fsService;
+  UiService(SongService songService, SetService setService, CsTransfer csTransfer, CloudProviderDrive cloudProviderDrive) {
     _songService = songService;
     _setService = setService;
     _csTransfer = csTransfer;
@@ -334,12 +331,9 @@ class UiService {
   }
   
   void syncWithDrive() {
-    
-    _songService.getAllSongs((List<Song> songs) {
-      _cloudProviderDrive.syncSongs(songs).then((_) {
-        print("sync ok");
-      });      
-    });
+    _cloudProviderDrive.syncSongs(_songService.getAllSongs()).then((_) {
+      print("sync ok");
+    });      
   }
   
   void initAppCache() {
@@ -404,28 +398,22 @@ class UiService {
   }
   
   void deleteAllData() {
-    _fsService.deleteAllFiles(() {
-      refreshAllSongsList();
-      refreshAllSetsList();
-      showSuccessModal("All data is gone.");
-    });
+    window.localStorage.clear();
+    showSuccessModal("All data is gone.");
   }
   
   void exportData() {
-    _csTransfer.export((String url) {
-      
-      _downloadExport.download = "cloudsheets.tar";
-      _downloadExport.href = url;
-      _downloadExport.text = "Download";
-      
-    });
+    _downloadExport.href = _csTransfer.export();
+
+    _downloadExport.download = "cloudsheets.tar";
+    _downloadExport.text = "Download";
   }
   
   void importSongs() {
      
      Iterable songs = _filesInput.files.where((File it) => !it.name.endsWith(".tar"));
      
-     _fsService.uploadFiles(songs, () {
+     _csTransfer.uploadFiles(songs).then((_) {
        print("files uploaded");
        _filesInput.style.display = "none";
        refreshAllSongsList();
@@ -438,15 +426,13 @@ class UiService {
      
      File archive = _archiveInput.files[0];
      
-     _csTransfer.importArchive(archive, () {
+     _csTransfer.importArchive(archive).then((_) {
        _archiveInput.style.display = "none";
        refreshAllSongsList();
        refreshAllSetsList();
        showSuccessModal("Archive successfully imported.");
      });
-     
-
-   }
+  }
   
   void nextSong() {
     SongSet ss = _setService.activeSet;
@@ -532,11 +518,10 @@ class UiService {
   void refreshAllSongsList() {
     UListElement allSongsList = $("#allSongsList")[0];
     allSongsList.children.clear();
-    _songService.getAllSongs((List<Song> songs) {
-      songs.forEach((Song s) {
-        LIElement elem = createSongElement(s);
-        allSongsList.children.add(elem);
-      });
+    List<Song> songs = _songService.getAllSongs();
+    songs.forEach((Song s) {
+      LIElement elem = createSongElement(s);
+      allSongsList.children.add(elem);
     });
   }
 
@@ -573,23 +558,20 @@ class UiService {
   
   void loadSong(Song s) {
     _songTitle.text = s.title;
-    s.readText((String text) {
-      _songBodyText.text = text;
-      _songService.activeSong = s;
-      sidebarVisible = false;
-      SongSet ss = _setService.activeSet;
-      if(ss != null) {
-        ss.songPos = s.pos;
-        markListEntry(_setList, s.pos);
+    _songBodyText.text = s.text;
+    _songService.activeSong = s;
+    sidebarVisible = false;
+    SongSet ss = _setService.activeSet;
+    if(ss != null) {
+      ss.songPos = s.pos;
+      markListEntry(_setList, s.pos);
+    }
+    for(int i=0; i < _allSongsList.children.length; i++) {
+      if(_allSongsList.children[i].dataset["key"] == s.key) {
+        markListEntry(_allSongsList, i);
       }
-      for(int i=0; i < _allSongsList.children.length; i++) {
-        if(_allSongsList.children[i].dataset["key"] == s.key) {
-          markListEntry(_allSongsList, i);
-        }
-      }
-      updateUiState();
-
-    });
+    }
+    updateUiState();
   }
 
   void markListEntry(Element elem, int pos) {
@@ -604,14 +586,10 @@ class UiService {
     Song s = _songService.activeSong;
     
     _songTitleInput.value = s.title;
-    s.readText((String text) {
-      _songBodyInput.value = text;  
-      _songEditMode = true;
-      updateUiState();    
-      sidebarVisible = false;
-    });
-
-    
+    _songBodyInput.value = s.text;  
+    _songEditMode = true;
+    updateUiState();    
+    sidebarVisible = false;
   }
   
   void resetUi() {
@@ -689,14 +667,12 @@ class UiService {
     _deleteSongModal.hide();
     
     Song s = _songService.activeSong;
+    _songService.deleteSong(s.key);
     
-    s.delete(() {
-      refreshAllSongsList();
-      _songService.activeSong = null;
-      _songEditMode = false;
-      resetUi();
-    });
-    
+    refreshAllSongsList();
+    _songService.activeSong = null;
+    _songEditMode = false;
+    resetUi();
   }
   
   void cancelSong() {
@@ -708,18 +684,18 @@ class UiService {
     Song s = _songService.activeSong;
     List<String> data = [];
        
-    _fsService.saveSongAsText(_songTitleInput.value + ".txt", _songBodyInput.value, (FileEntry entry) {
-      Song s = new Song(_fsService, entry, entry.name);
-      _songService.activeSong = s;
-      _songTitle.text = _songTitleInput.value;
-      _songBodyText.text = _songBodyInput.value;
-      
-      refreshAllSongsList();
-      _songEditMode = false;
-      
-      updateUiState();    
-      
-    });
+    s.key = _songTitleInput.value;
+    s.text = _songTitleInput.value;
+    _songService.saveSong(s);
+    
+    _songService.activeSong = s;
+    _songTitle.text = _songTitleInput.value;
+    _songBodyText.text = _songBodyInput.value;
+    
+    refreshAllSongsList();
+    _songEditMode = false;
+    
+    updateUiState();    
     
   }
   
@@ -729,16 +705,15 @@ class UiService {
 
   void refreshAllSetsList() {
     _allSetsList.children.clear();
-    _setService.getAllSets((List<SongSet> sets) {
-      sets.forEach((SongSet ss) {
-        LIElement elem = new LIElement();
-        elem.classes.add("list-group-item");
-        elem.text = ss.title; 
-        elem.onClick.listen((MouseEvent ev) {
-          loadSet(ss);
-        });
-        _allSetsList.children.add(elem);
+    List<SongSet> sets = _setService.getAllSets();
+    sets.forEach((SongSet ss) {
+      LIElement elem = new LIElement();
+      elem.classes.add("list-group-item");
+      elem.text = ss.title; 
+      elem.onClick.listen((MouseEvent ev) {
+        loadSet(ss);
       });
+      _allSetsList.children.add(elem);
     });
   }
   
@@ -805,7 +780,7 @@ class UiService {
     });
     
     _fsService.saveSet(_setTitleInput.value + ".txt", data, (FileEntry entry) {
-      SongSet ss = new SongSet(_fsService, entry, entry.name);
+      SongSet ss = new SongSet(entry.name);
       _setService.activeSet = ss;
       loadSet(ss);
       refreshAllSetsList();

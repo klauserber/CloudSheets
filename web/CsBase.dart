@@ -1,147 +1,38 @@
 library csBase;
 
-import 'dart:html';
-import 'dart:async';
-import 'FsService.dart';
 
 const String STORAGE_PREFIX = "cloudsheets.entities.";
 
-class StoreEntity {
+abstract class StoreEntity {
   
-  FileEntry _entry;
-  FsService _fsService;
   String key;
-  Function _baseDir; 
-  StoreEntityMetaData _meta;
+  int modTime;
   
-  StoreEntity(FsService fsService, FileEntry entry, String key) {
-    _entry = entry;
-    _fsService = fsService;
+  
+  StoreEntity(String key) {
     this.key = key;
   }
   
-  DirectoryEntry getBaseDir() {
-    return _baseDir();
+  StoreEntity.fromJson(Map m) {
+    key = m["key"];
+    modTime = m["modTime"];
   }
   
-  set baseDir(Function getBase) {
-    _baseDir = getBase;
+  Map toJson() {
+    Map m = {};
+    m['key'] = key;
+    m['modtime'] = modTime;
+    return m;
   }
   
-  
-  String get title {
-    int pos = key.lastIndexOf(".");
-    String title = pos > -1 ? key.substring(0, pos) : key;
-    if(_entry == null) title += " (NF)";
-    return title;
-  }
       
-  void readText(Function ready(String text)) {
-    if(_entry != null) {
-      _fsService.readTextForEntry(_entry, (String text) {
-        ready(text);
-      });
-    }
-    else {
-      ready("NOT FOUND");
-    }
-  }
+  String get title {
+    return key;
+  }  
   
-  Future<StoreEntityMetaData> readMeta() {
-    Completer cp = new Completer();
-    
-    if(_entry != null) {
-      _entry.getMetadata().then((Metadata metadata) {
-        _meta = new StoreEntityMetaData(metadata.size, metadata.modificationTime);
-        cp.complete(_meta);
-      });
-    }
-    else {
-      cp.completeError(new StateError("Entry not set"));
-    }
-    
-    return cp.future;
-  }
-  
-  
-  void delete(Function ready()) {
-    if(_entry != null) {
-      _fsService.deleteFile(_entry, (e) {
-        ready();
-      });
-    }
-    else {
-      ready();
-    }
-  }
-  
-  void storeIfNewer(String text, int time, Function ready()) {
-    getBaseDir().getFile(key).then((FileEntry entry) {
-      _entry = entry;
-      readMeta().then((meta) {
-        if(time > meta.modTime.millisecondsSinceEpoch) {
-          fsService.saveFile(getBaseDir(), key, text, (FileEntry newEntry) {
-            _entry = newEntry;
-            print(key + ": overriden");
-            ready();
-          });
-        } else {
-          print(key + ": skipped");
-          ready();
-        }
-      });
-    },
-    onError: (e) {
-      fsService.saveFile(getBaseDir(), key, text, (FileEntry newEntry) {
-        _entry = newEntry;
-        print(key + ": new");
-        ready();
-      });      
-    });
-
-  }
-  
-  
-  
-  void store(String text, Function ready()) {
-    getBaseDir().getFile(key).then((FileEntry entry) {
-      _entry = entry;
-      fsService.saveFile(getBaseDir(), key, text, (FileEntry newEntry) {
-        _entry = newEntry;
-        print(key + ": overriden");
-        ready();
-      });
-    }, onError: (e) {
-      fsService.saveFile(getBaseDir(), key, text, (FileEntry newEntry) {
-        _entry = newEntry;
-        print(key + ": new");
-        ready();
-      });      
-    });
-  }
-  
-  FsService get fsService {
-   return _fsService; 
-  }
-  
-  StoreEntityMetaData get meta {
-    if(_meta != null) {
-      return _meta;
-    }
-    else {
-      throw new StateError("call readMeta first");
-    }
-  }
-  
-}
-
-class StoreEntityMetaData {
-  int size;
-  DateTime modTime;
-  
-  StoreEntityMetaData(int size, DateTime modTime) {
-    this.size = size;
-    this.modTime = modTime;
+  @override
+  String toString() {
+    return key;
   }
   
 }

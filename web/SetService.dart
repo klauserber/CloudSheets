@@ -1,34 +1,46 @@
 library setService;
 
 import 'dart:html';
+import 'dart:convert';
 import 'CsBase.dart';
 import 'FsService.dart';
 import 'SongService.dart';
 
+const String STORAGE_SET_BASEKEY = "${STORAGE_PREFIX}.set";
 
 class SongSet extends StoreEntity {
   
   List<Song> _songs = [];
   int songPos = -1;
   
-  SongSet(FsService fsService, FileEntry entry, String key) : super(fsService, entry, key);
+  SongSet(String key) : super(key);
   
-  void readSongs(Function forEachSong(Song song)) {
-    readText((String text) {
-      _songs.clear();
-      int i = 0;
-      text.split("\n").forEach((String line) {
-        fsService.getSongFileEntry(line, (FileEntry entry) {
-          Song s = new Song(fsService, entry, line);
-          s.pos = i++;
-          _songs.add(s);
-          forEachSong(s);
-        });
-      });
-      songPos = -1;
+  SongSet.fromJson(Map m) : super.fromJson(m) {
+    m["songList"].forEach((key) {
+      String js = window.localStorage[key];
+      Song s;
+      if(js != null) {
+        _songs.add(new Song.fromJson(JSON.decoder.convert(js)));
+      }
+      else {
+        _songs.add(new Song(key + " (NF)"));
+      }
     });
   }
   
+  Map toJson() {
+    Map m = super.toJson();
+    
+    List<String> slist = [];
+    _songs.forEach((s) {
+      slist.add(s.key);
+    });
+    
+    m["songList"] = slist;
+    
+    return m;
+  }
+    
   List<Song> get songs {
     return _songs;
   }
@@ -46,35 +58,35 @@ class SongSet extends StoreEntity {
   }
 
 
-  @override
-  DirectoryEntry getBaseDir() {
-    return fsService.setsDir;
-  }
 }
 
 class SetService {
   
-  FsService _fsService;
   SongSet activeSet;
   
-  SetService(FsService fsService) {
-    this._fsService = fsService;
+  SetService() {
   }
   
-  void getAllSets(Function ready(List<SongSet> sets)) {
-    _fsService.readSets((List<FileEntry> entries) {
-      List<SongSet> result = [];
-      entries.forEach((FileEntry e) {
-        SongSet s = new SongSet(_fsService, e, e.name);
-        result.add(s);
-      });
-      result.sort((SongSet s1, SongSet s2) {
-        return s1.title.compareTo(s2.title);
-      });
-      ready(result);
+  List<SongSet> getAllSets() {
+    List<SongSet> result = [];
+    window.localStorage.keys.where((key) => key.startsWith(STORAGE_SET_BASEKEY)).forEach((key) {
+      result.add(new SongSet.fromJson(JSON.decoder.convert(window.localStorage[key])));
     });
+    
+    result.sort((s1, s2) => s1.title.compareTo(s2.title));
+    
+    return result;
   }
   
+  void deleteSet(String key) {
+    window.localStorage.remove(STORAGE_SET_BASEKEY + "." + key);
+  }
   
+  void saveSet(SongSet ss) {
+    ss.modTime = new DateTime.now().millisecondsSinceEpoch;
+    String text = JSON.encoder.convert(ss);
+    
+    window.localStorage[STORAGE_SET_BASEKEY + "." + ss.key] = text;
+  }
   
 }
