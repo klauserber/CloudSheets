@@ -399,6 +399,8 @@ class UiService {
   
   void deleteAllData() {
     window.localStorage.clear();
+    refreshAllSongsList();
+    refreshAllSetsList();
     showSuccessModal("All data is gone.");
   }
   
@@ -682,10 +684,13 @@ class UiService {
   
   void saveSong() {
     Song s = _songService.activeSong;
-    List<String> data = [];
-       
+    if(s == null) {
+      s = new Song(null);
+      _songService.activeSong = s;
+    }
+    
     s.key = _songTitleInput.value;
-    s.text = _songTitleInput.value;
+    s.text = _songBodyInput.value;
     _songService.saveSong(s);
     
     _songService.activeSong = s;
@@ -773,20 +778,21 @@ class UiService {
   }
   
   void saveSet() {
+    SongSet ss = new SongSet(_setTitleInput.value);
+    _setContentList.children.forEach((LIElement elem) {
+      String songKey = elem.dataset["key"];
+      Song s = _songService.findSong(songKey);
+      ss.songs.add(s);
+    });
+    
+    _setService.saveSet(ss);
+
     String data = "";
     
-    _setContentList.children.forEach((LIElement elem) {
-      data += '${elem.dataset["key"]}\n';
-    });
-    
-    _fsService.saveSet(_setTitleInput.value + ".txt", data, (FileEntry entry) {
-      SongSet ss = new SongSet(entry.name);
-      _setService.activeSet = ss;
-      loadSet(ss);
-      refreshAllSetsList();
-      switchToSongMode();
-    });
-    
+    _setService.activeSet = ss;
+    loadSet(ss);
+    refreshAllSetsList();
+    switchToSongMode();
   }
   
   void loadSet(SongSet ss) {
@@ -794,13 +800,12 @@ class UiService {
     _setList.children.clear();
     _setTitleText.text = ss.title;
     _setService.activeSet = ss;
-    ss.readSongs((Song song) {
+    ss.songs.forEach((Song song) {
       LIElement elem = createSongElement(song);
       _setList.children.add(elem);
     });
     
     updateUiState();
-    
   }
   
   void cancelSet() {
@@ -814,7 +819,7 @@ class UiService {
     if(ss != null) {
       _setContentList.children.clear();
       _setTitleInput.value = ss.title;
-      ss.readSongs((Song song) {
+      ss.songs.forEach((Song song) {
         addSongToSetList(song, true);
       });
       switchToSetMode();    
@@ -828,11 +833,10 @@ class UiService {
   
   void deleteSet() {
     SongSet ss = _setService.activeSet;
-    if(ss != null) ss.delete(() {
-      _setService.activeSet = null;
-      refreshAllSetsList();
-      updateUiState();      
-    });  
+    _setService.deleteSet(ss.key);
+    _setService.activeSet = null;
+    refreshAllSetsList();
+    updateUiState();      
   }
   
 }

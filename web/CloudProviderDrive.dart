@@ -2,6 +2,7 @@ library cloudProviderDrive;
 
 import 'dart:html';
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:googleapis/common/common.dart' as common;
 import 'package:googleapis_auth/auth_browser.dart' as auth;
@@ -135,17 +136,15 @@ class CloudProviderDrive {
         
         if(drv != null && local != null) {
           taskCount++;
-          local.readMeta().then((meta) {
-            if(drv.modifiedDate.millisecondsSinceEpoch > meta.modTime.millisecondsSinceEpoch) {
-              _copyDriveToLocal(drv, local).whenComplete(() => taskEnded());
-            }
-            else if(meta.modTime.millisecondsSinceEpoch > drv.modifiedDate.millisecondsSinceEpoch) {
-              _copyLocalToDrive(drv, local).whenComplete(() => taskEnded());
-            }
-            else {
-              taskEnded();
-            }
-          });
+          if(drv.modifiedDate.millisecondsSinceEpoch > local.modTime) {
+            _copyDriveToLocal(drv, local).whenComplete(() => taskEnded());
+          }
+          else if(local.modTime > drv.modifiedDate.millisecondsSinceEpoch) {
+            _copyLocalToDrive(drv, local).whenComplete(() => taskEnded());
+          }
+          else {
+            taskEnded();
+          }
         }
         
       });
@@ -160,12 +159,12 @@ class CloudProviderDrive {
     
     print("local -> drv: " + drv.title);
     
-    local.readText((text) {
-      drv.modifiedDate = local.meta.modTime.toUtc();
-      Stream<List<int>> stream = new Stream.fromFuture(new Future(() => text.codeUnits));
-      common.Media media = new common.Media(stream, text.length);
-      _driveApi.files.update(drv, drv.id, setModifiedDate: true, uploadMedia: media).then((file) => cp.complete());
-    });
+    drv.modifiedDate = new DateTime.fromMillisecondsSinceEpoch(local.modTime, isUtc: true);
+    String text = JSON.encoder.convert(local);
+    
+    Stream<List<int>> stream = new Stream.fromFuture(new Future(() => text.codeUnits));
+    common.Media media = new common.Media(stream, text.length);
+    _driveApi.files.update(drv, drv.id, setModifiedDate: true, uploadMedia: media).then((file) => cp.complete());
     
     return cp.future;
   }
@@ -178,7 +177,8 @@ class CloudProviderDrive {
     var headers = { "Authorization" : _token.type + " " + _token.data };
     
     HttpRequest.request(drv.downloadUrl, requestHeaders: headers).then((request) {
-      local.store(request.responseText, () { cp.complete(); });
+      // TODO
+      //local.store(request.responseText, () { cp.complete(); });
     });
     
     return cp.future;

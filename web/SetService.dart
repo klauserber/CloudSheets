@@ -16,15 +16,18 @@ class SongSet extends StoreEntity {
   SongSet(String key) : super(key);
   
   SongSet.fromJson(Map m) : super.fromJson(m) {
+    int counter = 0;
     m["songList"].forEach((key) {
-      String js = window.localStorage[key];
+      String js = window.localStorage[STORAGE_SONG_BASEKEY + "." + key];
       Song s;
       if(js != null) {
-        _songs.add(new Song.fromJson(JSON.decoder.convert(js)));
+        s = new Song.fromJson(JSON.decoder.convert(js));
       }
       else {
-        _songs.add(new Song(key + " (NF)"));
+        s = new Song(key + " (NF)");
       }
+      s.pos = counter++;
+      _songs.add(s);
     });
   }
   
@@ -77,6 +80,12 @@ class SetService {
     
     return result;
   }
+  
+  SongSet findSet(String key) {
+    String js = window.localStorage[STORAGE_SET_BASEKEY + "." + key];
+    return js != null ? new Song.fromJson(JSON.decoder.convert(js)) : null;
+  }
+  
   
   void deleteSet(String key) {
     window.localStorage.remove(STORAGE_SET_BASEKEY + "." + key);
