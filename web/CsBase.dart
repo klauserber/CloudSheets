@@ -1,7 +1,13 @@
 library csBase;
 
+import 'dart:convert';
+
 
 const String STORAGE_PREFIX = "cloudsheets.entities.";
+
+String stripForJson(String text) {
+  return text.replaceAll("{", "(").replaceAll("}", ")");
+}
 
 abstract class StoreEntity {
   
@@ -18,10 +24,11 @@ abstract class StoreEntity {
     modTime = m["modTime"];
   }
   
+  
   Map toJson() {
     Map m = {};
     m['key'] = key;
-    m['modtime'] = modTime;
+    m['modTime'] = modTime;
     return m;
   }
   

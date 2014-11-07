@@ -401,6 +401,7 @@ class UiService {
     window.localStorage.clear();
     refreshAllSongsList();
     refreshAllSetsList();
+    resetUi();
     showSuccessModal("All data is gone.");
   }
   
