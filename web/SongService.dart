@@ -4,7 +4,6 @@ import 'dart:html';
 import 'dart:convert';
 import 'CsBase.dart';
 
-const String STORAGE_SONG_BASEKEY = "${STORAGE_PREFIX}.song";
 
 class Song extends StoreEntity {
   int pos = -1;

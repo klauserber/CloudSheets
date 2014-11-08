@@ -1,4 +1,4 @@
-library csExporter;
+library csTransfer;
 
 import 'dart:html';
 import 'dart:async';

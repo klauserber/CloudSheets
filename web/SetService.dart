@@ -3,10 +3,8 @@ library setService;
 import 'dart:html';
 import 'dart:convert';
 import 'CsBase.dart';
-import 'FsService.dart';
 import 'SongService.dart';
 
-const String STORAGE_SET_BASEKEY = "${STORAGE_PREFIX}.set";
 
 class SongSet extends StoreEntity {
   

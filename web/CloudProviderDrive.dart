@@ -9,6 +9,7 @@ import 'package:googleapis_auth/auth_browser.dart' as auth;
 import 'package:googleapis/drive/v2.dart' as drive;
 
 import 'SongService.dart';
+import 'SetService.dart';
 import 'CsBase.dart';
 
 
@@ -30,6 +31,9 @@ class CloudProviderDrive {
   
   auth.AccessToken _token;
   
+  SongService _songService;
+  SetService _setService;
+  
   
   StreamController<String> _statusStreamController = new StreamController();
   
@@ -47,6 +51,9 @@ class CloudProviderDrive {
   // You need to enable the Drive API in the Google Developers Console.
   final scopes = [drive.DriveApi.DriveScope];
 
+  
+  CloudProviderDrive(this._songService, this._setService);
+  
   void init() {
     _statusStreamController.add("initialising ...");        
     auth.createImplicitBrowserFlow(identifier, scopes).then((auth.BrowserOAuth2Flow flow) {
@@ -146,6 +153,11 @@ class CloudProviderDrive {
             taskEnded();
           }
         }
+        if(drv == null && local != null) {
+          _copyLocalToDrive(drv, local).whenComplete(() { 
+            taskEnded(); 
+          });
+        }
         
       });
       
@@ -156,17 +168,49 @@ class CloudProviderDrive {
   
   Future _copyLocalToDrive(drive.File drv, StoreEntity local) {
     Completer cp = new Completer();
-    
     print("local -> drv: " + drv.title);
+
+    bool isSong = (local is Song);
     
-    drv.modifiedDate = new DateTime.fromMillisecondsSinceEpoch(local.modTime, isUtc: true);
     String text = JSON.encoder.convert(local);
     
     Stream<List<int>> stream = new Stream.fromFuture(new Future(() => text.codeUnits));
     common.Media media = new common.Media(stream, text.length);
-    _driveApi.files.update(drv, drv.id, setModifiedDate: true, uploadMedia: media).then((file) => cp.complete());
+
+    
+    if(drv != null) {
+      drv.modifiedDate = new DateTime.fromMillisecondsSinceEpoch(local.modTime, isUtc: true);
+      _driveApi.files.update(drv, drv.id, setModifiedDate: true, uploadMedia: media).then((file) {
+        setSynced(local);
+        cp.complete();        
+      });      
+    }
+    else {
+      drive.File newDrv = new drive.File();
+      newDrv.title = local.key + ".json";
+      newDrv.mimeType = "text/json";
+      newDrv.modifiedDate = new DateTime.fromMillisecondsSinceEpoch(local.modTime, isUtc: true);
+      newDrv.parents = isSong ? [_songsDir] : [_setsDir];
+      _driveApi.files.insert(newDrv, uploadMedia: media).then((file) {
+        setSynced(local);
+        cp.complete();
+      });
+    }
+    
+    
     
     return cp.future;
+  }
+
+  void setSynced(StoreEntity local) {
+    local.setSynced();
+    
+    if(local is Song) {
+      _songService.saveSong(local);
+    }
+    else {
+      _setService.saveSet(local);
+    }
   }
   
   

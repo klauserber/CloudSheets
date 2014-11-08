@@ -4,15 +4,20 @@ import 'dart:convert';
 
 
 const String STORAGE_PREFIX = "cloudsheets.entities.";
+const String STORAGE_SET_BASEKEY = "${STORAGE_PREFIX}.set";
+const String STORAGE_SONG_BASEKEY = "${STORAGE_PREFIX}.song";
+
 
 String stripForJson(String text) {
   return text.replaceAll("{", "(").replaceAll("}", ")");
 }
 
+
 abstract class StoreEntity {
   
   String key;
   int modTime;
+  int _storeState = 0;
   
   
   StoreEntity(String key) {
@@ -22,13 +27,15 @@ abstract class StoreEntity {
   StoreEntity.fromJson(Map m) {
     key = m["key"];
     modTime = m["modTime"];
+    _storeState = m["storeState"] != null ? m["storeState"] : 0;
   }
   
   
   Map toJson() {
     Map m = {};
-    m['key'] = key;
-    m['modTime'] = modTime;
+    m["key"] = key;
+    m["modTime"] = modTime;
+    m["storeState"] = _storeState;
     return m;
   }
   
@@ -42,8 +49,28 @@ abstract class StoreEntity {
     return key;
   }
   
+  bool get newEntry {
+    return _storeState == 0; 
+  }
+  void setNewEntry() {
+    _storeState = 0;
+  }
+  
+  bool get synced {
+    return _storeState == 1; 
+  }
+  void setSynced() {
+    _storeState = 1;
+  }
+  
+  bool get deleted {
+    return _storeState == 2; 
+  }
+  void setDeleted() {
+    _storeState = 2;
+  }
 }
-
+ 
 /**
  * Emulation of Java Enum class.
  *
