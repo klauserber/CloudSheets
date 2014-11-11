@@ -25,39 +25,23 @@ class Song extends StoreEntity {
   
 }
 
-class SongService {
+class SongService extends StoreService<Song> {
   
   Song activeSong;
-  
-  SongService() {
-  }
-  
-  List<Song> getAllSongs() {
-    List<Song> result = [];
-    window.localStorage.keys.where((key) => key.startsWith(STORAGE_SONG_BASEKEY)).forEach((key) {
-      result.add(new Song.fromJson(JSON.decoder.convert(window.localStorage[key])));
-    });
     
-    result.sort((s1, s2) => s1.title.compareTo(s2.title));
-    
-    return result;
-  }
+  @override
+  String get baseKey => STORAGE_SONG_BASEKEY;
+
   
-  Song findSong(String key) {
+  @override
+  Song find(String key) {
     String js = window.localStorage[STORAGE_SONG_BASEKEY + "." + key];
     return js != null ? new Song.fromJson(JSON.decoder.convert(js)) : null;
   }
-  
-  
-  void deleteSong(String key) {
-    window.localStorage.remove(STORAGE_SONG_BASEKEY + "." + key);
+
+
+  @override
+  Song create(String text) {
+    return new Song.fromJson(JSON.decoder.convert(text));
   }
-  
-  void saveSong(Song s) {
-    s.modTime = new DateTime.now().millisecondsSinceEpoch;
-    String text = JSON.encoder.convert(s);
-    
-    window.localStorage[STORAGE_SONG_BASEKEY + "." + s.key] = text;
-  }
-  
 }

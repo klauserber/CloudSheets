@@ -5,7 +5,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'SongService.dart';
 import 'SetService.dart';
-import 'CsBase.dart' as csBase;
+import 'CsBase.dart';
 import 'package:archive/archive.dart';
 
 class CsTransfer {
@@ -28,7 +28,7 @@ class CsTransfer {
   }
 
   void exportSongs(Archive arch) {
-    List<Song> songs = _songService.getAllSongs();
+    List<Song> songs = _songService.getAll();
     songs.forEach((Song song) {
       String text = JSON.encoder.convert(song);
       ArchiveFile file = new ArchiveFile("/cloudsheets/songs/" + song.key + ".json", text.length, text.codeUnits);
@@ -49,7 +49,7 @@ class CsTransfer {
   
   void exportSets(Archive arch) {
     
-    List<SongSet> ssList = _setService.getAllSets();
+    List<SongSet> ssList = _setService.getAll();
     ssList.forEach((SongSet ss) {
       String text = JSON.encoder.convert(ss);
       
@@ -87,7 +87,7 @@ class CsTransfer {
         
         String text = new String.fromCharCodes(archFile.content);
 
-        String key = _stripExtention(name);        
+        String key = stripExtention(name);        
         
         String storageKey = (isSong ? STORAGE_SONG_BASEKEY : STORAGE_SET_BASEKEY) + "." + key;
         
@@ -100,12 +100,7 @@ class CsTransfer {
     
     return cp.future;
   }
-  
-  String _stripExtention(String name) {
-    int pos = name.lastIndexOf(".");
-    return pos > -1 ? name.substring(0, pos) : name;        
-  }
-  
+    
   Future uploadFiles(Iterable<File> files) {
     
     Completer cp = new Completer();
@@ -118,7 +113,7 @@ class CsTransfer {
         String data = reader.result;
         bool isJson = file.name.endsWith(".json");
         
-        String key = _stripExtention(file.name);
+        String key = stripExtention(file.name);
         String text;
         if(isJson) {
           text = data;

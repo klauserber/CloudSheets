@@ -113,17 +113,28 @@ class CloudProviderDrive {
     return _statusStreamController.stream;
   }
   
-  Future syncSongs(List<Song> songs) {
-    return _syncDir(_songsDir, songs);
+  Future sync() {
+    Completer cp = new Completer();
+    syncSongs().whenComplete(() => syncSets().whenComplete(() => cp.complete()));
+    return cp.future;
+  }
+  
+  Future syncSongs() {
+    List<Song> songs = _songService.getAll(includeDeleted: true);
+    return _syncDir(_songsDir, songs, _songService);
+  }
+  
+  Future syncSets() {
+    List<SongSet> sets = _setService.getAll(includeDeleted: true);
+    return _syncDir(_setsDir, sets, _setService);
   }
   
 
-  Future _syncDir(drive.ParentReference driveDir, List<StoreEntity> entities) {
+  Future _syncDir(drive.ParentReference driveDir, List<StoreEntity> entities, StoreService storeService) {
     Completer completer = new Completer();
     _statusStreamController.add("syncing ...");
     
     _searchDriveFiles(driveDir).then((Map<String, drive.File> driveFiles) {
-      int taskCount = 0;
       Set<String> workList = new Set.from(driveFiles.keys);
       
       Map<String, StoreEntity> localEntities = {};
@@ -131,7 +142,8 @@ class CloudProviderDrive {
       
       workList.addAll(localEntities.keys);
       int counter = workList.length; 
-      Function taskEnded = () {
+      Function taskEnded = (String key) {
+        print("complete: $key");
         if(--counter == 0) {
           _statusStreamController.add("authorized");          
           completer.complete();
@@ -141,21 +153,52 @@ class CloudProviderDrive {
         drive.File drv = driveFiles[it];
         StoreEntity local = localEntities[it]; 
         
+        // present in drive and local
         if(drv != null && local != null) {
-          taskCount++;
-          if(drv.modifiedDate.millisecondsSinceEpoch > local.modTime) {
-            _copyDriveToLocal(drv, local).whenComplete(() => taskEnded());
+          DateTime localDate = new DateTime.fromMillisecondsSinceEpoch(local.modTime, isUtc: true);
+          print("Timestamps ${local.key}: drv:${drv.modifiedDate} - local:${localDate}");
+          
+          if(local.deleted) {
+            print("delete ${local.key}");
+            _driveApi.files.delete(drv.id).then((_) {
+              storeService.delete(local.key);
+              taskEnded(local.key);
+            });
+            
           }
+          // File on drive is never
+          else if(drv.modifiedDate.millisecondsSinceEpoch > local.modTime) {
+            _copyDriveToLocal(drv, storeService).then((key) => taskEnded(key));
+          }
+          // Local file is newer
           else if(local.modTime > drv.modifiedDate.millisecondsSinceEpoch) {
-            _copyLocalToDrive(drv, local).whenComplete(() => taskEnded());
+            _copyLocalToDrive(driveDir, drv, local, storeService).then((key) => taskEnded(key));
           }
+          // Same => nothing todo
           else {
-            taskEnded();
+            print("nothing todo for ${local.key}");
+            taskEnded(local.key);
           }
         }
-        if(drv == null && local != null) {
-          _copyLocalToDrive(drv, local).whenComplete(() { 
-            taskEnded(); 
+        // File exists only local
+        else if(drv == null && local != null) {
+          if(local.newEntry) {
+            print("new entry ${local.key}");
+            _copyLocalToDrive(driveDir, drv, local, storeService).then((key) { 
+              taskEnded(key);
+            });
+          }
+          else {
+            print("obsolete entry ${local.key}");
+            storeService.delete(local.key);
+            taskEnded(local.key);
+          }
+        }
+        // File exists only in drive
+        else if(drv != null && local == null) {
+          print("new entry in drive ${it}");
+          _copyDriveToLocal(drv, storeService).then((key) { 
+            taskEnded(key);
           });
         }
         
@@ -166,12 +209,10 @@ class CloudProviderDrive {
     return completer.future;
   }
   
-  Future _copyLocalToDrive(drive.File drv, StoreEntity local) {
+  Future<String> _copyLocalToDrive(drive.ParentReference driveDir, drive.File drv, StoreEntity local, StoreService storeService) {
     Completer cp = new Completer();
-    print("local -> drv: " + drv.title);
+    print("local -> drv: " + local.title);
 
-    bool isSong = (local is Song);
-    
     String text = JSON.encoder.convert(local);
     
     Stream<List<int>> stream = new Stream.fromFuture(new Future(() => text.codeUnits));
@@ -181,8 +222,9 @@ class CloudProviderDrive {
     if(drv != null) {
       drv.modifiedDate = new DateTime.fromMillisecondsSinceEpoch(local.modTime, isUtc: true);
       _driveApi.files.update(drv, drv.id, setModifiedDate: true, uploadMedia: media).then((file) {
-        setSynced(local);
-        cp.complete();        
+        local.setSynced();
+        storeService.save(local, updateModTime: false);
+        cp.complete(local.key);        
       });      
     }
     else {
@@ -190,44 +232,34 @@ class CloudProviderDrive {
       newDrv.title = local.key + ".json";
       newDrv.mimeType = "text/json";
       newDrv.modifiedDate = new DateTime.fromMillisecondsSinceEpoch(local.modTime, isUtc: true);
-      newDrv.parents = isSong ? [_songsDir] : [_setsDir];
+      newDrv.parents = [driveDir];
       _driveApi.files.insert(newDrv, uploadMedia: media).then((file) {
-        setSynced(local);
-        cp.complete();
+        local.setSynced();
+        storeService.save(local, updateModTime: false);
+        cp.complete(local.key);
       });
     }
-    
-    
     
     return cp.future;
   }
 
-  void setSynced(StoreEntity local) {
-    local.setSynced();
-    
-    if(local is Song) {
-      _songService.saveSong(local);
-    }
-    else {
-      _setService.saveSet(local);
-    }
-  }
-  
-  
-  Future _copyDriveToLocal(drive.File drv, StoreEntity local) {
+  Future<String> _copyDriveToLocal(drive.File drv, StoreService storeService) {
     Completer cp = new Completer();
     
     print("drv -> local: " + drv.title);
+
     var headers = { "Authorization" : _token.type + " " + _token.data };
     
     HttpRequest.request(drv.downloadUrl, requestHeaders: headers).then((request) {
-      // TODO
-      //local.store(request.responseText, () { cp.complete(); });
+      StoreEntity local = storeService.create(request.responseText);
+      local.setSynced();
+      storeService.save(local);
+      cp.complete(local.key);
     });
     
     return cp.future;
-    
   }
+  
   
   
   Future<Map<String, drive.File>> _searchDriveFiles(drive.ParentReference dir) {
@@ -237,7 +269,7 @@ class CloudProviderDrive {
       // The API call returns only a subset of the results. It is possible
       // to query through the whole result set via "paging".
       return _driveApi.files.list(q: query, pageToken: token).then((results) {
-        results.items.forEach((it) => docs[it.title] = it);
+        results.items.forEach((it) => docs[stripExtention(it.title)] = it);
         // If we would like to have more documents, we iterate.
         if (results.nextPageToken != null) {
           return next(results.nextPageToken);

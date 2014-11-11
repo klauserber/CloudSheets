@@ -331,7 +331,10 @@ class UiService {
   }
   
   void syncWithDrive() {
-    _cloudProviderDrive.syncSongs(_songService.getAllSongs()).then((_) {
+    _cloudProviderDrive.sync().whenComplete(() {
+      refreshAllSongsList();
+      refreshAllSetsList();
+      resetUi();
       print("sync ok");
     });      
   }
@@ -521,7 +524,7 @@ class UiService {
   void refreshAllSongsList() {
     UListElement allSongsList = $("#allSongsList")[0];
     allSongsList.children.clear();
-    List<Song> songs = _songService.getAllSongs();
+    List<Song> songs = _songService.getAll();
     songs.forEach((Song s) {
       LIElement elem = createSongElement(s);
       allSongsList.children.add(elem);
@@ -670,7 +673,7 @@ class UiService {
     _deleteSongModal.hide();
     
     Song s = _songService.activeSong;
-    _songService.deleteSong(s.key);
+    _songService.markDeleted(s);
     
     refreshAllSongsList();
     _songService.activeSong = null;
@@ -692,7 +695,7 @@ class UiService {
     
     s.key = _songTitleInput.value;
     s.text = _songBodyInput.value;
-    _songService.saveSong(s);
+    _songService.save(s);
     
     _songService.activeSong = s;
     _songTitle.text = _songTitleInput.value;
@@ -711,7 +714,7 @@ class UiService {
 
   void refreshAllSetsList() {
     _allSetsList.children.clear();
-    List<SongSet> sets = _setService.getAllSets();
+    List<SongSet> sets = _setService.getAll();
     sets.forEach((SongSet ss) {
       LIElement elem = new LIElement();
       elem.classes.add("list-group-item");
@@ -782,11 +785,11 @@ class UiService {
     SongSet ss = new SongSet(_setTitleInput.value);
     _setContentList.children.forEach((LIElement elem) {
       String songKey = elem.dataset["key"];
-      Song s = _songService.findSong(songKey);
+      Song s = _songService.find(songKey);
       ss.songs.add(s);
     });
     
-    _setService.saveSet(ss);
+    _setService.save(ss);
 
     String data = "";
     
@@ -834,7 +837,7 @@ class UiService {
   
   void deleteSet() {
     SongSet ss = _setService.activeSet;
-    _setService.deleteSet(ss.key);
+    _setService.markDeleted(ss);
     _setService.activeSet = null;
     refreshAllSetsList();
     updateUiState();      

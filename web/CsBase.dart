@@ -1,5 +1,6 @@
 library csBase;
 
+import 'dart:html';
 import 'dart:convert';
 
 
@@ -7,9 +8,9 @@ const String STORAGE_PREFIX = "cloudsheets.entities.";
 const String STORAGE_SET_BASEKEY = "${STORAGE_PREFIX}.set";
 const String STORAGE_SONG_BASEKEY = "${STORAGE_PREFIX}.song";
 
-
-String stripForJson(String text) {
-  return text.replaceAll("{", "(").replaceAll("}", ")");
+String stripExtention(String name) {
+  int pos = name.lastIndexOf(".");
+  return pos > -1 ? name.substring(0, pos) : name;        
 }
 
 
@@ -69,6 +70,47 @@ abstract class StoreEntity {
   void setDeleted() {
     _storeState = 2;
   }
+}
+
+abstract class StoreService<T extends StoreEntity> {
+  
+  String get baseKey;
+  
+  List<T> getAll({bool includeDeleted: false}) {
+    List<T> result = [];
+    window.localStorage.forEach((key, text) {
+      if(key.startsWith(baseKey)) {
+        T ent = create(text);
+        if(!ent.deleted || includeDeleted) {
+          result.add(ent);
+        }
+      }      
+    });
+    result.sort((s1, s2) => s1.title.compareTo(s2.title));
+    return result;
+  }
+
+
+  void delete(String key) {
+    window.localStorage.remove(baseKey + "." + key);
+  }
+  
+  void markDeleted(T ent) {
+    ent.setDeleted();
+    save(ent);
+  }
+  
+  void save(T s, {bool updateModTime: true}) {
+    if(updateModTime) s.modTime = new DateTime.now().millisecondsSinceEpoch;
+    String text = JSON.encoder.convert(s);
+    
+    window.localStorage[baseKey + "." + s.key] = text;
+  }
+
+  T find(String key);
+  
+  T create(String text);
+
 }
  
 /**

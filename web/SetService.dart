@@ -61,39 +61,23 @@ class SongSet extends StoreEntity {
 
 }
 
-class SetService {
+class SetService extends StoreService<SongSet> {
   
   SongSet activeSet;
   
-  SetService() {
-  }
+  @override
+  String get baseKey => STORAGE_SET_BASEKEY;
   
-  List<SongSet> getAllSets() {
-    List<SongSet> result = [];
-    window.localStorage.keys.where((key) => key.startsWith(STORAGE_SET_BASEKEY)).forEach((key) {
-      result.add(new SongSet.fromJson(JSON.decoder.convert(window.localStorage[key])));
-    });
-    
-    result.sort((s1, s2) => s1.title.compareTo(s2.title));
-    
-    return result;
-  }
-  
-  SongSet findSet(String key) {
-    String js = window.localStorage[STORAGE_SET_BASEKEY + "." + key];
+  @override
+  SongSet find(String key) {
+    String js = window.localStorage[baseKey + "." + key];
     return js != null ? new Song.fromJson(JSON.decoder.convert(js)) : null;
   }
   
-  
-  void deleteSet(String key) {
-    window.localStorage.remove(STORAGE_SET_BASEKEY + "." + key);
+  @override
+  SongSet create(String text) {
+    return new SongSet.fromJson(JSON.decoder.convert(text));
   }
   
-  void saveSet(SongSet ss) {
-    ss.modTime = new DateTime.now().millisecondsSinceEpoch;
-    String text = JSON.encoder.convert(ss);
-    
-    window.localStorage[STORAGE_SET_BASEKEY + "." + ss.key] = text;
-  }
-  
+
 }
