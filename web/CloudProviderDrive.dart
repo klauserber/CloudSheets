@@ -36,6 +36,7 @@ class CloudProviderDrive {
   
   
   StreamController<String> _statusStreamController = new StreamController();
+  StreamController<String> _syncStatusStreamController = new StreamController();
   
   // Obtain the client ID email from the Google Developers Console by creating
   // new OAuth credentials of application type "Web application".
@@ -45,7 +46,8 @@ class CloudProviderDrive {
   // be accessed.
   
   // http://localhost:8080
-  final identifier = new auth.ClientId("921848755413-aaeqsfqmhtf5prgu2jpdfa7sbb44fpha.apps.googleusercontent.com", null);
+  //final identifier = new auth.ClientId("921848755413-aaeqsfqmhtf5prgu2jpdfa7sbb44fpha.apps.googleusercontent.com", null);
+  final identifier = new auth.ClientId("921848755413-6km91tei0efakrsgss5hd98vj60o986t.apps.googleusercontent.com", null);
   
   // This is the list of scopes this application will use.
   // You need to enable the Drive API in the Google Developers Console.
@@ -113,6 +115,10 @@ class CloudProviderDrive {
     return _statusStreamController.stream;
   }
   
+  Stream<String> get onSyncStatus {
+    return _syncStatusStreamController.stream;
+  }
+  
   Future sync() {
     Completer cp = new Completer();
     syncSongs().whenComplete(() => syncSets().whenComplete(() => cp.complete()));
@@ -120,11 +126,13 @@ class CloudProviderDrive {
   }
   
   Future syncSongs() {
+    _syncStatusStreamController.add("syncing Songs ...");
     List<Song> songs = _songService.getAll(includeDeleted: true);
     return _syncDir(_songsDir, songs, _songService);
   }
   
   Future syncSets() {
+    _syncStatusStreamController.add("syncing Sets ...");
     List<SongSet> sets = _setService.getAll(includeDeleted: true);
     return _syncDir(_setsDir, sets, _setService);
   }
@@ -132,7 +140,6 @@ class CloudProviderDrive {
 
   Future _syncDir(drive.ParentReference driveDir, List<StoreEntity> entities, StoreService storeService) {
     Completer completer = new Completer();
-    _statusStreamController.add("syncing ...");
     
     _searchDriveFiles(driveDir).then((Map<String, drive.File> driveFiles) {
       Set<String> workList = new Set.from(driveFiles.keys);
@@ -141,72 +148,111 @@ class CloudProviderDrive {
       entities.forEach((it) => localEntities[it.key] = it);
       
       workList.addAll(localEntities.keys);
-      int counter = workList.length; 
-      Function taskEnded = (String key) {
-        print("complete: $key");
-        if(--counter == 0) {
-          _statusStreamController.add("authorized");          
-          completer.complete();
-        }
-      };
-      workList.forEach((it) {
-        drive.File drv = driveFiles[it];
-        StoreEntity local = localEntities[it]; 
-        
-        // present in drive and local
-        if(drv != null && local != null) {
-          DateTime localDate = new DateTime.fromMillisecondsSinceEpoch(local.modTime, isUtc: true);
-          print("Timestamps ${local.key}: drv:${drv.modifiedDate} - local:${localDate}");
-          
-          if(local.deleted) {
-            print("delete ${local.key}");
-            _driveApi.files.delete(drv.id).then((_) {
-              storeService.delete(local.key);
-              taskEnded(local.key);
-            });
-            
-          }
-          // File on drive is never
-          else if(drv.modifiedDate.millisecondsSinceEpoch > local.modTime) {
-            _copyDriveToLocal(drv, storeService).then((key) => taskEnded(key));
-          }
-          // Local file is newer
-          else if(local.modTime > drv.modifiedDate.millisecondsSinceEpoch) {
-            _copyLocalToDrive(driveDir, drv, local, storeService).then((key) => taskEnded(key));
-          }
-          // Same => nothing todo
-          else {
-            print("nothing todo for ${local.key}");
-            taskEnded(local.key);
-          }
-        }
-        // File exists only local
-        else if(drv == null && local != null) {
-          if(local.newEntry) {
-            print("new entry ${local.key}");
-            _copyLocalToDrive(driveDir, drv, local, storeService).then((key) { 
-              taskEnded(key);
-            });
-          }
-          else {
-            print("obsolete entry ${local.key}");
-            storeService.delete(local.key);
-            taskEnded(local.key);
-          }
-        }
-        // File exists only in drive
-        else if(drv != null && local == null) {
-          print("new entry in drive ${it}");
-          _copyDriveToLocal(drv, storeService).then((key) { 
-            taskEnded(key);
-          });
-        }
-        
+
+      _syncItems(workList, 0, driveFiles, localEntities, storeService, driveDir).then((_) {
+        _syncStatusStreamController.add("ok");          
+        completer.complete();        
+      }).catchError((e) {
+        _syncStatusStreamController.add("error!");
+        completer.completeError(e);
       });
-      
+    }).catchError((e) {
+      _syncStatusStreamController.add("error!");
+      completer.completeError(e);
     });
     
     return completer.future;
+  }
+  
+  Future _syncItems(Set<String> workList, int i, Map<String, drive.File> driveFiles, Map<String, StoreEntity> localEntities,
+       StoreService storeService, drive.ParentReference driveDir) {
+    
+    Completer cp = new Completer();
+    int count = workList.length; 
+    
+    
+    if(i < count) {
+      String key = workList.elementAt(i);
+      _syncStatusStreamController.add("syncing '$key' (${i + 1} of $count)");
+
+      _syncItem(key, driveFiles, localEntities, storeService, driveDir).then((key) {
+        print("complete: $key");
+        _syncItems(workList, i + 1, driveFiles, localEntities, storeService, driveDir).then((_) {
+          print("complete: syncItems");  
+          cp.complete();
+        });
+      }).catchError((e) => cp.completeError(e));
+    }
+    else {
+      print("complete: worklist");          
+      cp.complete();
+    }
+    
+    
+    return cp.future;
+    
+  }
+  
+
+  Future<String> _syncItem(String it, Map<String, drive.File> driveFiles, Map<String, StoreEntity> localEntities, 
+      StoreService storeService, drive.ParentReference driveDir) {
+    
+    Completer<String> cp = new Completer();
+    
+    drive.File drv = driveFiles[it];
+    StoreEntity local = localEntities[it]; 
+    
+    // present in drive and local
+    if(drv != null && local != null) {
+      DateTime localDate = new DateTime.fromMillisecondsSinceEpoch(local.modTime, isUtc: true);
+      print("Timestamps ${local.key}: drv:${drv.modifiedDate} - local:${localDate}");
+      
+      if(local.deleted) {
+        print("delete ${local.key}");
+        _driveApi.files.delete(drv.id).then((_) {
+          storeService.delete(local.key);
+          cp.complete(local.key);
+        }).catchError((e) => cp.completeError(e));
+        
+      }
+      // File on drive is never
+      else if(drv.modifiedDate.millisecondsSinceEpoch > local.modTime) {
+        _copyDriveToLocal(drv, storeService).then((key) => cp.complete(key))
+          .catchError((e) => cp.completeError(e));
+      }
+      // Local file is newer
+      else if(local.modTime > drv.modifiedDate.millisecondsSinceEpoch) {
+        _copyLocalToDrive(driveDir, drv, local, storeService).then((key) => cp.complete(key))
+          .catchError((e) => cp.completeError(e));
+      }
+      // Same => nothing todo
+      else {
+        print("nothing todo for ${local.key}");
+        cp.complete(local.key);
+      }
+    }
+    // File exists only local
+    else if(drv == null && local != null) {
+      if(local.newEntry) {
+        print("new entry ${local.key}");
+        _copyLocalToDrive(driveDir, drv, local, storeService).then((key) { 
+          cp.complete(key);
+        }).catchError((e) => cp.completeError(e));
+      }
+      else {
+        print("obsolete entry ${local.key}");
+        storeService.delete(local.key);
+        cp.complete(local.key);
+      }
+    }
+    // File exists only in drive
+    else if(drv != null && local == null) {
+      print("new entry in drive ${it}");
+      _copyDriveToLocal(drv, storeService).then((key) { 
+        cp.complete(key);
+      }).catchError((e) => cp.completeError(e));
+    }
+    return cp.future;
   }
   
   Future<String> _copyLocalToDrive(drive.ParentReference driveDir, drive.File drv, StoreEntity local, StoreService storeService) {
@@ -225,7 +271,7 @@ class CloudProviderDrive {
         local.setSynced();
         storeService.save(local, updateModTime: false);
         cp.complete(local.key);        
-      });      
+      }).catchError((e) => cp.completeError(e));      
     }
     else {
       drive.File newDrv = new drive.File();
@@ -237,7 +283,7 @@ class CloudProviderDrive {
         local.setSynced();
         storeService.save(local, updateModTime: false);
         cp.complete(local.key);
-      });
+      }).catchError((e) => cp.completeError(e));
     }
     
     return cp.future;
@@ -255,7 +301,7 @@ class CloudProviderDrive {
       local.setSynced();
       storeService.save(local);
       cp.complete(local.key);
-    });
+    }).catchError((e) => cp.completeError(e));
     
     return cp.future;
   }

@@ -105,6 +105,7 @@ class UiService {
   ButtonElement _driveButton;
   ButtonElement _driveSyncButton;
   SpanElement _driveStatusLabel;
+  SpanElement _driveSyncStatusLabel;
   
   AnchorElement _downloadExport;
   
@@ -274,7 +275,9 @@ class UiService {
     _driveButton = $("#driveButton")[0];
     _driveSyncButton = $("#driveSyncButton")[0];
     _driveStatusLabel = $("#driveStatusLabel")[0];
+    _driveSyncStatusLabel = $("#driveSyncStatusLabel")[0];
     _cloudProviderDrive.onStatus.listen((String status) => driveStatusChange(status));
+    _cloudProviderDrive.onSyncStatus.listen((String status) => driveSyncStatusChange(status));
     _driveButton.onClick.listen((e) => _cloudProviderDrive.authorize());    
     _driveSyncButton.onClick.listen((e) => syncWithDrive());    
     
@@ -308,6 +311,16 @@ class UiService {
       _driveButton.disabled = true;      
     }
     if(status == "authorized") {
+      _driveSyncButton.disabled = false;
+    }
+    else {
+      _driveSyncButton.disabled = true;      
+    }
+  }
+  
+  void driveSyncStatusChange(String status) {
+    _driveSyncStatusLabel.text = status;
+    if(status == "ok" || status == "error!") {
       _driveSyncButton.disabled = false;
     }
     else {
