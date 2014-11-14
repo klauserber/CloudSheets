@@ -243,7 +243,6 @@ class UiService {
     
     _updateButton = $("#updateButton")[0];
     _versionLabel = $("#versionLabel")[0];
-    _versionLabel.text = "$CS_VERSION";
     
     _importButton.onClick.listen((e) {
       _filesInput.style.display = "inline";
@@ -359,10 +358,16 @@ class UiService {
       cache.swapCache();
       window.location.reload();
     });
-    cache.onNoUpdate.listen((e) {
-      _successMessage.text = "You have already the newest Version.";
-      _successModal.show();
+    cache.onChecking.listen((e) {
+      _versionLabel.text = "checking ... ($CS_VERSION)";    
     });
+    cache.onError.listen((e) {
+      _versionLabel.text = "error! ($CS_VERSION)";    
+    });
+    cache.onNoUpdate.listen((e) {
+      _versionLabel.text = "$CS_VERSION";
+    });
+
   }
   
   void initSwiping() {
