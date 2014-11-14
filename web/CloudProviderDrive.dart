@@ -46,8 +46,8 @@ class CloudProviderDrive {
   // be accessed.
   
   // http://localhost:8080
-  final identifier = new auth.ClientId("921848755413-aaeqsfqmhtf5prgu2jpdfa7sbb44fpha.apps.googleusercontent.com", null);
-  //final identifier = new auth.ClientId("921848755413-6km91tei0efakrsgss5hd98vj60o986t.apps.googleusercontent.com", null);
+  //final identifier = new auth.ClientId("921848755413-aaeqsfqmhtf5prgu2jpdfa7sbb44fpha.apps.googleusercontent.com", null);
+  final identifier = new auth.ClientId("921848755413-6km91tei0efakrsgss5hd98vj60o986t.apps.googleusercontent.com", null);
   
   // This is the list of scopes this application will use.
   // You need to enable the Drive API in the Google Developers Console.
