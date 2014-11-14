@@ -362,7 +362,7 @@ class UiService {
       _versionLabel.text = "checking ... ($CS_VERSION)";    
     });
     cache.onError.listen((e) {
-      _versionLabel.text = "error! ($CS_VERSION)";    
+      _versionLabel.text = "$CS_VERSION (cached)";    
     });
     cache.onNoUpdate.listen((e) {
       _versionLabel.text = "$CS_VERSION";
