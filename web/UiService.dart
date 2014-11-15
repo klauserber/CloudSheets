@@ -309,7 +309,7 @@ class UiService {
     else {
       _driveButton.disabled = true;      
     }
-    if(status == "authorized") {
+    if(status.startsWith("authorized")) {
       _driveSyncButton.disabled = false;
     }
     else {
@@ -623,6 +623,10 @@ class UiService {
     _songService.activeSong = null;
     _setService.activeSet = null;
     
+    _setTitleInput.value = "";
+    _setContentList.children.clear;
+    
+    
     sidebarVisible = true;
     
     _songEditMode = false;
@@ -747,6 +751,7 @@ class UiService {
   void newSet() {
     _setContentList.children.clear;
     _setTitleInput.value = "";
+    _setService.activeSet = null;
     switchToSetMode();    
   }
   
@@ -806,11 +811,11 @@ class UiService {
       Song s = _songService.find(songKey);
       ss.songs.add(s);
     });
+    _setTitleInput.value = "";
+    _setContentList.children.clear;
     
     _setService.save(ss);
 
-    String data = "";
-    
     _setService.activeSet = ss;
     loadSet(ss);
     refreshAllSetsList();
@@ -858,6 +863,7 @@ class UiService {
     _setService.markDeleted(ss);
     _setService.activeSet = null;
     refreshAllSetsList();
+    resetUi();
     updateUiState();      
   }
   
