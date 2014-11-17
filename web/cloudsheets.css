@@ -70,6 +70,11 @@
 	background-color: #f0f0f0;
 }
 
+#insertSpaceButton {
+	margin-left: 8px;
+	margin-right: 8px;
+}
+
 .list-group-item {
 	cursor: pointer;
 }

@@ -66,9 +66,20 @@ class UiService {
   DivElement _songEditItems;
   InputElement _songTitleInput;
   TextAreaElement _songBodyInput;
-  ButtonElement _insertHashButton;
+
+  ButtonElement _insertCButton;
+  ButtonElement _insertDButton;
+  ButtonElement _insertEButton;
+  ButtonElement _insertFButton;
+  ButtonElement _insertGButton;
+  ButtonElement _insertAButton;
   ButtonElement _insertBButton;
-  ButtonElement _insertMButton;
+  
+  ButtonElement _insertSpaceButton;
+  
+  ButtonElement _insertHashButton;
+  ButtonElement _insertbButton;
+  ButtonElement _insertmButton;
 
   DivElement _songViewItems;
   HeadingElement _songTitle;
@@ -180,17 +191,33 @@ class UiService {
     _songEditItems = $("#songEditItems")[0];
     _songTitleInput = $("#songTitleInput")[0];
     _songBodyInput = $("#songBodyInput")[0];
-    //_songBodyInput.onKeyPress.listen((e) {
-      //print("${e.shiftKey} ${e.charCode}");
-      //e.charCode = 97;
-    //});
 
-    _insertHashButton = $("#insertHashButton")[0];
-    _insertHashButton.onClick.listen((e) => insert("#"));
+
+    _insertCButton = $("#insertCButton")[0];
+    _insertCButton.onClick.listen((e) => insert("C"));
+    _insertDButton = $("#insertDButton")[0];
+    _insertDButton.onClick.listen((e) => insert("D"));
+    _insertEButton = $("#insertEButton")[0];
+    _insertEButton.onClick.listen((e) => insert("E"));
+    _insertFButton = $("#insertFButton")[0];
+    _insertFButton.onClick.listen((e) => insert("F"));
+    _insertGButton = $("#insertGButton")[0];
+    _insertGButton.onClick.listen((e) => insert("G"));
+    _insertAButton = $("#insertAButton")[0];
+    _insertAButton.onClick.listen((e) => insert("A"));
     _insertBButton = $("#insertBButton")[0];
-    _insertBButton.onClick.listen((e) => insert("b"));
-    _insertMButton = $("#insertMButton")[0];
-    _insertMButton.onClick.listen((e) => insert("m"));
+    _insertBButton.onClick.listen((e) => insert("B"));
+
+    _insertSpaceButton = $("#insertSpaceButton")[0];
+    _insertSpaceButton.onClick.listen((e) => insert("  "));
+    
+    
+    _insertHashButton = $("#insertHashButton")[0];
+    _insertHashButton.onClick.listen((e) => insert("# "));
+    _insertbButton = $("#insertbButton")[0];
+    _insertbButton.onClick.listen((e) => insert("b "));
+    _insertmButton = $("#insertmButton")[0];
+    _insertmButton.onClick.listen((e) => insert("m "));
     
     _songViewItems = $("#songViewItems")[0];
     _songTitle = $("#songTitle")[0];
@@ -319,14 +346,7 @@ class UiService {
       goOffline();
     }
   }
-  
-  void insertHash() {
-    insert("#");
-  }
-  void insertB() {
-    insert("b");
-  }
-  
+    
   void insert(String str) {
     String val = _songBodyInput.value;
     int start = _songBodyInput.selectionStart;
@@ -338,7 +358,7 @@ class UiService {
     
     _songBodyInput.value = newVal;
     
-    _songBodyInput.setSelectionRange(start + 1, start + 1);
+    _songBodyInput.setSelectionRange(start + str.length, start + str.length);
   }
   
   void driveStatusChange(String status) {
