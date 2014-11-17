@@ -63,10 +63,16 @@ class UiService {
   ButtonElement _songSaveButton;
   ButtonElement _songCancelButton;
   
-  HeadingElement _songTitle;
+  DivElement _songEditItems;
   InputElement _songTitleInput;
-  PreElement _songBodyText;
   TextAreaElement _songBodyInput;
+  ButtonElement _insertHashButton;
+  ButtonElement _insertBButton;
+  ButtonElement _insertMButton;
+
+  DivElement _songViewItems;
+  HeadingElement _songTitle;
+  PreElement _songBodyText;
   
   // Set elements
   CssStyleSheet _setStyles;
@@ -170,17 +176,30 @@ class UiService {
     _songDeleteButton = $("#songDeleteButton")[0];
     _songSaveButton = $("#songSaveButton")[0];
     _songCancelButton = $("#songCancelButton")[0];
-    
-    _songTitle = $("#songTitle")[0];
+                  
+    _songEditItems = $("#songEditItems")[0];
     _songTitleInput = $("#songTitleInput")[0];
     _songBodyInput = $("#songBodyInput")[0];
+    //_songBodyInput.onKeyPress.listen((e) {
+      //print("${e.shiftKey} ${e.charCode}");
+      //e.charCode = 97;
+    //});
+
+    _insertHashButton = $("#insertHashButton")[0];
+    _insertHashButton.onClick.listen((e) => insert("#"));
+    _insertBButton = $("#insertBButton")[0];
+    _insertBButton.onClick.listen((e) => insert("b"));
+    _insertMButton = $("#insertMButton")[0];
+    _insertMButton.onClick.listen((e) => insert("m"));
+    
+    _songViewItems = $("#songViewItems")[0];
+    _songTitle = $("#songTitle")[0];
     _songBodyText = $("#songBodyText")[0];
     
     _songSaveButton.disabled = true;
     _songCancelButton.disabled = true;
     
-    _songBodyInput.style.display = "none";
-    _songTitleInput.style.display = "none";
+    _songEditItems.style.display = "none";
     
     _sidebarToggle.onClick.listen((e) => toggleSidebar());
     
@@ -299,6 +318,27 @@ class UiService {
     else {
       goOffline();
     }
+  }
+  
+  void insertHash() {
+    insert("#");
+  }
+  void insertB() {
+    insert("b");
+  }
+  
+  void insert(String str) {
+    String val = _songBodyInput.value;
+    int start = _songBodyInput.selectionStart;
+    int end = _songBodyInput.selectionEnd;
+    
+    String newVal = val.substring(0, start);
+    newVal += str;
+    newVal += val.substring(end);
+    
+    _songBodyInput.value = newVal;
+    
+    _songBodyInput.setSelectionRange(start + 1, start + 1);
   }
   
   void driveStatusChange(String status) {
@@ -651,11 +691,8 @@ class UiService {
     _songEditButton.disabled = _songEditMode;
     
     setVisible(_songView, _mode == OperatingMode.SONG);
-    setVisible(_songTitle, !_songEditMode);
-    setVisible(_songBodyText, !_songEditMode);
-    setVisible(_songTitleInput, _songEditMode);
-    setVisible(_songBodyInput, _songEditMode);
-    
+    setVisible(_songViewItems, !_songEditMode);
+    setVisible(_songEditItems, _songEditMode);    
     
     _setBackButton.disabled = !actSet;
     _setDeleteButton.disabled = !actSet;

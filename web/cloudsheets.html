@@ -176,15 +176,23 @@
 	    </div>
 	    <div id="mainContent"">
 	     <div id="songView">
-	       <h2 id="songTitle">Title</h2>
-	       <pre id="songBodyText"></pre>
-	
-	       <div class="form-group" style="margin-top: 15px;">
-	        <input type="text" id="songTitleInput" class="form-control" placeholder="Title"/>
+	       <div id="songViewItems">
+		       <h2 id="songTitle">Title</h2>
+		       <pre id="songBodyText"></pre>
 	       </div>
-	       <div class="form-group">
-	        <textarea id="songBodyInput" class="form-control" placeholder="Song Content"></textarea>
-	       </div>
+         <div id="songEditItems">
+		       <div class="form-group" style="margin-top: 15px;">
+		        <input type="text" id="songTitleInput" class="form-control" placeholder="Title"/>
+		       </div>
+		       <div class="form-group">
+		        <div id="editToolBar" class="hidden-xs">
+              <button id="insertHashButton" class="btn btn-standard"><i>#</i></button>
+              <button id="insertBButton" class="btn btn-standard"><i>b</i></button>
+              <button id="insertMButton" class="btn btn-standard">m</button>
+            </div>
+		        <textarea id="songBodyInput" class="form-control" placeholder="Song Content"></textarea>
+		       </div>
+		     </div>
 	     </div>
        <div id="setView">
          <div class="form-group" style="margin-top: 15px;">
