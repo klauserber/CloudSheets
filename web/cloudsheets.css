@@ -18,6 +18,22 @@
 	padding: 10px;
   width: 55%;
   float: left;
+  position: absolute;
+
+  transition-property: left;
+  transition-duration: 0.4s;
+  transition-timing-function: ease;
+}
+
+#mainContent {
+  display: inline-block;
+  width: 45%;
+  padding: 0px 15px 0px 15px;
+  position: absolute;
+  
+  transition-property: left;
+  transition-duration: 0.4s;
+  transition-timing-function: ease;
 }
 
 #allSongsContainer, #allSetsList, #setList, #setContentContainer, #songBodyText {
@@ -42,11 +58,6 @@
 }
  
 
-#mainContent {
-  display: inline-block;
-  width: 45%;
-  padding: 0px 15px 0px 15px;
-}
 
 .container-fluid {
 	padding: 0px;

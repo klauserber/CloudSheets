@@ -32,7 +32,9 @@ class UiService {
   OperatingMode _mode;
   bool _songEditMode = false;
 
-  int touchStartX;
+  int _touchSongX;
+  int _touchContentX;
+  int _touchSidebarX;
 
   
   ButtonElement _sidebarToggle;
@@ -53,6 +55,8 @@ class UiService {
   DivElement _songView; 
 
   DivElement _songToolBar; 
+  
+  DivElement _content;
 
   ButtonElement _songNextButton;
   ButtonElement _songPrevButton;
@@ -162,6 +166,9 @@ class UiService {
     
     _mode = OperatingMode.SONG;
         
+    _content = $("#content")[0];
+    
+    
     _sidebarContainer = $("#sidebarContainer")[0];
     _sidebarToggle = $("#sidebarToggle")[0];
     _mainContent = $("#mainContent")[0];
@@ -436,24 +443,24 @@ class UiService {
       //event.preventDefault();
 
       if (event.touches.length > 0) {
-        touchStartX = event.touches[0].page.x;
+        _touchSongX = event.touches[0].page.x;
       }
     });
 
     _songBodyText.onTouchMove.listen((TouchEvent event) {
 
-      if (touchStartX != null && event.touches.length > 0) {
+      if (_touchSongX != null && event.touches.length > 0) {
         int newTouchX = event.touches[0].page.x;
         //print("start: $touchStartX, new: $newTouchX");
         
-        if (newTouchX - 150 > touchStartX) {
+        if (newTouchX - 150 > _touchSongX) {
           event.preventDefault();
           prevSong();
-          touchStartX = null;
-        } else if (newTouchX + 150 < touchStartX) {
+          _touchSongX = null;
+        } else if (newTouchX + 150 < _touchSongX) {
           event.preventDefault();
           nextSong();
-          touchStartX = null;
+          _touchSongX = null;
         }
       }
     });
@@ -461,10 +468,64 @@ class UiService {
     _songBodyText.onTouchEnd.listen((TouchEvent event) {
       //event.preventDefault();
 
-      touchStartX = null;
+      _touchSongX = null;
     });    
     
     
+    _content.onTouchStart.listen((TouchEvent event) {
+      //event.preventDefault();
+
+      if (event.touches.length > 0) {
+        _touchContentX = event.touches[0].page.x;
+      }
+    });
+
+    _content.onTouchMove.listen((TouchEvent event) {
+
+      if (_touchContentX != null && event.touches.length > 0) {
+        int newTouchX = event.touches[0].page.x;
+        
+        if (!sidebarVisible && _touchContentX < 30 && newTouchX > 80) {
+          sidebarVisible = true;
+          _touchContentX = null;
+        }
+      }
+    });
+
+    _content.onTouchEnd.listen((TouchEvent event) {
+      //event.preventDefault();
+
+      _touchContentX = null;
+    });    
+
+    _sidebarContainer.onTouchStart.listen((TouchEvent event) {
+      //event.preventDefault();
+
+      if (event.touches.length > 0) {
+        _touchSidebarX = event.touches[0].page.x;
+      }
+    });
+
+    _sidebarContainer.onTouchMove.listen((TouchEvent event) {
+
+      if (_touchSidebarX != null && event.touches.length > 0) {
+        int newTouchX = event.touches[0].page.x;
+        print("start: $_touchSidebarX, new: $newTouchX");
+        
+        if (newTouchX + 75 < _touchSidebarX) {
+          sidebarVisible = false;
+          _touchSidebarX = null;
+        }
+      }
+    });
+
+    _sidebarContainer.onTouchEnd.listen((TouchEvent event) {
+      //event.preventDefault();
+
+      _touchSidebarX = null;
+    });    
+    
+  
   }
   
 
@@ -539,6 +600,7 @@ class UiService {
   void setSizes() {
     
     int h = window.innerHeight;
+    int w = window.innerWidth;
     
     _setContentContainer.style.height = "${h - 130}px";
     _allSongsContainer.style.height = "${h - 140}px";
@@ -546,6 +608,10 @@ class UiService {
     
     _songBodyText.style.height = "${h - _songTitle.getBoundingClientRect().height - 100}px";
     _songBodyInput.style.height = "${h - 130}px";
+    
+    _sidebarContainer.style.left = _sidebarVisible ? "0px" : "${w * 0.55 * -1}px";
+    _mainContent.style.left = !_sidebarVisible ? "0px" : "${w * 0.55}px";
+    _mainContent.style.width = _sidebarVisible ? "45%" : "100%";
     
     optimizeSetToolbar();
     
@@ -586,8 +652,6 @@ class UiService {
   void set sidebarVisible(bool val) {
     if(val) window.scrollTo(0, 0);
     _sidebarVisible = val;
-    _sidebarContainer.style.display = _sidebarVisible ? "block" : "none";
-    _mainContent.style.width = _sidebarVisible ? "45%" : "100%";
     setSizes();
   }
   
