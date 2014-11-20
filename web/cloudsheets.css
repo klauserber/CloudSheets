@@ -1,12 +1,37 @@
 
 .navbar {
-	padding: 8px;
+	padding: 8px 8px 8px 0px;
 }
 
 .nav-left {
   float: left;
-	
 }
+.menuLine {
+	border-top: 2px solid #a0a0a0;
+	padding-bottom: 3px;
+	width: 12px;
+	display: block;
+}
+
+#sidebarToggle {
+	padding-top: 6px;
+	display: inline-block;
+	width: 25px;
+  cursor: pointer;  
+}
+
+#titleLink {
+  display: inline-block;
+  float: right;
+  padding: 5px 6px 6px 0px;
+  color: #a0a0a0;
+  font-size: 1.15em;
+  cursor: pointer;	
+}
+#titleLink:hover {
+	text-decoration: none;
+}
+
 .nav-right {
 	text-align: right;
   display: inline-block;

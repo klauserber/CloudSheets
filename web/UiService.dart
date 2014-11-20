@@ -37,7 +37,8 @@ class UiService {
   int _touchSidebarX;
 
   
-  ButtonElement _sidebarToggle;
+  AnchorElement _sidebarToggle;
+  AnchorElement _titleLink;
   DivElement _sidebarContainer;
   DivElement _mainContent;
   
@@ -171,6 +172,7 @@ class UiService {
     
     _sidebarContainer = $("#sidebarContainer")[0];
     _sidebarToggle = $("#sidebarToggle")[0];
+    _titleLink = $("#titleLink")[0];
     _mainContent = $("#mainContent")[0];
     
     
@@ -236,6 +238,7 @@ class UiService {
     _songEditItems.style.display = "none";
     
     _sidebarToggle.onClick.listen((e) => toggleSidebar());
+    _titleLink.onClick.listen((e) => toggleSidebar());
     
     _songNextButton.onClick.listen((e) => nextSong());
     _songPrevButton.onClick.listen((e) => prevSong());
@@ -761,7 +764,8 @@ class UiService {
   void updateUiState() {
     bool actSet = _setService.activeSet != null;
     
-    _sidebarToggle.disabled = _songEditMode || _mode == OperatingMode.SET;
+    // TODO
+    //_sidebarToggle.disabled = _songEditMode || _mode == OperatingMode.SET;
     
     setVisible(_songToolBar, _mode == OperatingMode.SONG);
     setVisible(_setToolBar, _mode == OperatingMode.SET);
