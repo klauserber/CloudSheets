@@ -372,6 +372,8 @@ class UiService {
     _songBodyInput.value = newVal;
     
     _songBodyInput.setSelectionRange(start + str.length, start + str.length);
+    
+    _songBodyInput.focus();
   }
   
   void driveStatusChange(String status) {
