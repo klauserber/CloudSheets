@@ -1,3 +1,3 @@
 library csConst;
 
-const String CS_VERSION = "1.0.0-beta-0015";
+const String CS_VERSION = "1.0.0-beta-0016";

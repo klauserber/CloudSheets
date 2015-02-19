@@ -72,6 +72,7 @@ class UiService {
   InputElement _songTitleInput;
   TextAreaElement _songBodyInput;
 
+  DivElement _editToolBar; 
   ButtonElement _insertCButton;
   ButtonElement _insertDButton;
   ButtonElement _insertEButton;
@@ -202,6 +203,8 @@ class UiService {
     _songBodyInput = $("#songBodyInput")[0];
 
 
+    _editToolBar = $("#editToolBar")[0];
+    
     _insertCButton = $("#insertCButton")[0];
     _insertCButton.onClick.listen((e) => insert("C"));
     _insertDButton = $("#insertDButton")[0];
@@ -605,16 +608,21 @@ class UiService {
     int h = window.innerHeight;
     int w = window.innerWidth;
     
+    bool editTb = w > 520 && h > 480;
+    
     _setContentContainer.style.height = "${h - 130}px";
     _allSongsContainer.style.height = "${h - 140}px";
     _setList.style.height = "${h - 250}px";
     
     _songBodyText.style.height = "${h - _songTitle.getBoundingClientRect().height - 100}px";
-    _songBodyInput.style.height = "${h - 130}px";
+    int inputHeight = h - 130 - (editTb ? 40 : 0);
+    _songBodyInput.style.height = "${inputHeight}px";
     
     _sidebarContainer.style.left = _sidebarVisible ? "0px" : "${w * 0.55 * -1}px";
     _mainContent.style.left = !_sidebarVisible ? "0px" : "${w * 0.55}px";
     _mainContent.style.width = _sidebarVisible ? "45%" : "100%";
+    
+    _editToolBar.style.display = editTb ? "block" : "none";
     
     optimizeSetToolbar();
     
