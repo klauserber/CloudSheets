@@ -1,32 +1,33 @@
 <project name="CloudSheets" basedir="." default="deploy">
-	
-  <property file="deploy.properties"/>
-	
-	
+
+	<property file="deploy.properties"/>
+
+
 	<target name="deploy">
-		
-		<echo message="${host}"></echo>
-	  		
+
+		<echo message="${host}">
+		</echo>
+
 		<scp todir="${userid}@${host}:${remotedir}" sftp="true"
 			keyfile="${keyfile}" passphrase="${passphrase}">
-	  <fileset dir="build/web">
-	   <include name="cloudsheets.html" />
-     <include name="cloudsheets.css" />
-	   <include name="css/bootstrap.css" />
-	   <include name="packages/browser/dart.js" />
-     <include name="js/jquery.js" />
-     <include name="js/bootstrap.js" />
-     <include name="cloudsheets.dart.js" />
-     <include name="fonts/glyphicons-halflings-regular.woff" />
-     <include name="fonts/glyphicons-halflings-regular.ttf" />
-     <include name="css/bootstrap-theme.css" />
-	   <include name="cloudsheets.dart.js" />
-	  </fileset>
-	  <fileset dir=".">
-	   <include name="cloudsheets.appcache" />
-	  </fileset>
-	 </scp>
+			<fileset dir="build/web">
+				<include name="index.html" />
+				<include name="cloudsheets.css" />
+				<include name="css/bootstrap.css" />
+				<include name="packages/browser/dart.js" />
+				<include name="js/jquery.js" />
+				<include name="js/bootstrap.js" />
+				<include name="cloudsheets.dart.js" />
+				<include name="fonts/glyphicons-halflings-regular.woff" />
+				<include name="fonts/glyphicons-halflings-regular.ttf" />
+				<include name="css/bootstrap-theme.css" />
+				<include name="cloudsheets.dart.js" />
+			</fileset>
+			<fileset dir=".">
+				<include name="cloudsheets.appcache" />
+			</fileset>
+		</scp>
 	</target>
-	
-	
+
+
 </project>
